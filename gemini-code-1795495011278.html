@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Custom Cake Order Coordination Workflow</title>
+    <style>
+      :root {
+        --bg: #f6f8f5;
+        --surface: #ffffff;
+        --surface-soft: #eef3ec;
+        --primary: #2d5a43;
+        --primary-light: #437d5f;
+        --accent: #e09f3e;
+        --accent-soft: #fdf5e6;
+        --danger-soft: #fdf0ed;
+        --danger-text: #b84a39;
+        --text-main: #232d27;
+        --text-muted: #5c6b62;
+        --border: #dce4dc;
+        --radius: 16px;
+        --shadow: 0 10px 28px rgba(35, 45, 39, 0.06);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text-main);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        padding: 20px;
+      }
+
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 32px;
+        box-shadow: var(--shadow);
+      }
+
+      /* Header */
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--primary);
+        background: var(--surface-soft);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 32px;
+        font-weight: 400;
+        line-height: 1.18;
+        margin: 12px 0 8px;
+        color: var(--text-main);
+      }
+
+      .intro {
+        max-width: 600px;
+        color: var(--text-muted);
+        font-size: 15px;
+        margin: 0;
+      }
+
+      .tag {
+        border: 1px solid var(--border);
+        background: #fafcfa;
+        border-radius: 30px;
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--primary);
+        white-space: nowrap;
+      }
+
+      /* Interactive Mode Switcher */
+      .toggle-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--surface-soft);
+        padding: 8px 12px;
+        border-radius: 14px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .toggle-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-main);
+        padding-left: 6px;
+      }
+
+      .toggle-btns {
+        display: flex;
+        gap: 6px;
+        background: #dfe7de;
+        padding: 4px;
+        border-radius: 10px;
+      }
+
+      .toggle-btn {
+        border: none;
+        background: transparent;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .toggle-btn.active {
+        background: var(--surface);
+        color: var(--primary);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      }
+
+      /* Views */
+      .view-panel {
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .view-panel.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .chaos-box {
+        background: var(--danger-soft);
+        border: 1px dashed #e5b3a8;
+        border-radius: var(--radius);
+        padding: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+
+      .messy-note {
+        background: #fff;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border-left: 3px solid var(--danger-text);
+        font-size: 12.5px;
+        color: #4a3531;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      }
+
+      .messy-note strong {
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+        color: var(--danger-text);
+        margin-bottom: 4px;
+      }
+
+      /* Simulator Grid */
+      .demo-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .sim-card {
+        background: #fafcfa;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .sim-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .form-group {
+        margin-bottom: 10px;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+      }
+
+      .form-group select,
+      .form-group input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 13px;
+        background: #fff;
+        color: var(--text-main);
+      }
+
+      .btn-run {
+        width: 100%;
+        margin-top: 8px;
+        padding: 11px;
+        border: none;
+        border-radius: 10px;
+        background: var(--primary);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-run:hover {
+        background: var(--primary-light);
+      }
+
+      .btn-run:active {
+        transform: scale(0.98);
+      }
+
+      /* Prep Plan & Calendar Output */
+      .prep-list {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+
+      .prep-item {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 11px 13px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .prep-item.new-highlight {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        animation: popCard 0.45s ease;
+      }
+
+      @keyframes popCard {
+        0% { transform: scale(0.97); }
+        100% { transform: scale(1); }
+      }
+
+      .cake-title {
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--text-main);
+      }
+
+      .cake-meta {
+        font-size: 11.5px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .diet-tag {
+        display: inline-block;
+        margin-top: 4px;
+        padding: 2px 7px;
+        border-radius: 8px;
+        font-size: 10.5px;
+        font-weight: 600;
+        background: var(--surface-soft);
+        color: var(--primary);
+      }
+
+      .prep-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 9px;
+        border-radius: 12px;
+        background: #fde8c8;
+        color: #9c6211;
+        white-space: nowrap;
+      }
+
+      .prep-badge.done {
+        background: #dff0e5;
+        color: #235c3a;
+      }
+
+      .owner-toast {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: var(--surface-soft);
+        border-left: 3px solid var(--primary);
+        font-size: 12px;
+        color: var(--text-main);
+      }
+
+      /* Interactive 3-Step Flow */
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .step {
+        background: var(--surface-soft);
+        border: 1.5px solid transparent;
+        border-radius: 14px;
+        padding: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .step:hover, .step.active-step {
+        background: #fff;
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px rgba(45, 90, 67, 0.08);
+      }
+
+      .step-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+
+      .num {
+        color: var(--primary);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+
+      .step-title {
+        font-weight: 700;
+        font-size: 13.5px;
+        margin-bottom: 4px;
+        color: var(--text-main);
+      }
+
+      .step-desc {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .foot {
+        margin-top: 20px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        color: var(--text-muted);
+        font-size: 11.5px;
+      }
+
+      @media (max-width: 720px) {
+        .wrap { padding: 20px; }
+        .demo-grid { grid-template-columns: 1fr; }
+        .steps { grid-template-columns: 1fr; }
+        h1 { font-size: 26px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="top">
+        <div>
+          <div class="eyebrow">🎂 Practical Workflow · Order Coordination</div>
+          <h1>From custom cake request to a clear prep plan.</h1>
+          <p class="intro">
+            Custom cake orders carry important details—design, servings, dietary notes, and pickup dates. Test how a new request turns into an organized prep task.
+          </p>
+        </div>
+        <span class="tag">🧁 Independent Cake Bakery</span>
+      </div>
+
+      <!-- View Switcher -->
+      <div class="toggle-bar">
+        <span class="toggle-label">Compare the bakery workflow:</span>
+        <div class="toggle-btns">
+          <button class="toggle-btn active" id="btn-after" onclick="switchView('after')">
+            ✅ Organized Prep Plan (Try It)
+          </button>
+          <button class="toggle-btn" id="btn-before" onclick="switchView('before')">
+            😫 Scattered Orders
+          </button>
+        </div>
+      </div>
+
+      <!-- BEFORE VIEW -->
+      <div id="view-before" class="view-panel">
+        <div class="chaos-box">
+          <div class="messy-note">
+            <strong>📩 DM & Email Mix-Up</strong>
+            Customer asked for "nut-free floral buttercream" in an Instagram DM, while size and pickup date were in a separate email.
+          </div>
+          <div class="messy-note">
+            <strong>📅 Unlogged Pickup Date</strong>
+            Order sat in the inbox without a calendar slot until the baker checked messages late at night.
+          </div>
+          <div class="messy-note">
+            <strong>📝 Manual Prep Guessing</strong>
+            Hard to tell at a glance what sponges to bake first versus what needs decorating tomorrow.
+          </div>
+        </div>
+      </div>
+
+      <!-- AFTER VIEW (INTERACTIVE SIMULATOR) -->
+      <div id="view-after" class="view-panel active">
+        <div class="demo-grid">
+          <!-- Left: Custom Cake Order Form -->
+          <div class="sim-card">
+            <div>
+              <div class="sim-title">
+                <span>1. Custom Cake Request</span>
+                <span>🍰 Live Demo</span>
+              </div>
+              <div class="form-group">
+                <label for="cakeStyle">Design & Size</label>
+                <select id="cakeStyle">
+                  <option value="2-Tier Botanical (24 servings)" selected>2-Tier Botanical (24 servings)</option>
+                  <option value="Vintage Lambeth Heart (12 servings)">Vintage Lambeth Heart (12 servings)</option>
+                  <option value="Classic Celebration Sheet (36 servings)">Classic Celebration Sheet (36 servings)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="dietNote">Dietary & Flavor Note</label>
+                <select id="dietNote">
+                  <option value="Lemon Vanilla · Nut-Free" selected>Lemon Vanilla · Nut-Free</option>
+                  <option value="Chocolate Ganache · Eggless">Chocolate Ganache · Eggless</option>
+                  <option value="Strawberry Cream · Standard">Strawberry Cream · Standard</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="pickupDate">Requested Pickup</label>
+                <select id="pickupDate">
+                  <option value="Sat · 2:00 PM" selected>Saturday · 2:00 PM</option>
+                  <option value="Sun · 11:30 AM">Sunday · 11:30 AM</option>
+                  <option value="Fri · 4:00 PM">Friday · 4:00 PM</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-run" onclick="addCakeOrder()">
+              <span>✨ Create Order & Prep Task</span>
+            </button>
+          </div>
+
+          <!-- Right: Bakery Order Tracker & Prep Queue -->
+          <div class="sim-card">
+            <div>
+              <div class="sim-title">
+                <span>2. Order Tracker & Prep Queue</span>
+                <span id="orderCount">2 Orders</span>
+              </div>
+              <div class="prep-list" id="prepList">
+                <div class="prep-item">
+                  <div>
+                    <div class="cake-title">6" Berry Chantilly (10 servings)</div>
+                    <div class="cake-meta">📅 Pickup: Thu · 1:00 PM · Prep: Bake sponge & whip cream</div>
+                    <span class="diet-tag">Standard Dairy</span>
+                  </div>
+                  <span class="prep-badge done">In Prep ✓</span>
+                </div>
+                <div class="prep-item">
+                  <div>
+                    <div class="cake-title">3-Tier Marble Celebration (40 servings)</div>
+                    <div class="cake-meta">📅 Pickup: Sat · 12:00 PM · Prep: Dowel tiers & ganache</div>
+                    <span class="diet-tag">Nut-Free</span>
+                  </div>
+                  <span class="prep-badge">Queued</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="owner-toast" id="ownerToast">
+              <span>📋 <strong>Ready:</strong> Submit a cake request to generate an order record, calendar pickup slot, and prep task.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive 3-Step Flow -->
+      <div class="steps">
+        <div class="step active-step" id="step-1" onclick="highlightStep(1)">
+          <div class="step-top">
+            <span class="num">01 · CUSTOMER</span>
+            <span>🎂</span>
+          </div>
+          <div class="step-title">Submits cake order form</div>
+          <div class="step-desc">Captures style, servings, dietary notes, and pickup date in one spot.</div>
+        </div>
+
+        <div class="step" id="step-2" onclick="highlightStep(2)">
+          <div class="step-top">
+            <span class="num">02 · AUTOMATION</span>
+            <span>🗓️</span>
+          </div>
+          <div class="step-title">Logs order & calendar slot</div>
+          <div class="step-desc">Saves the order record and places the pickup date on the bakery calendar.</div>
+        </div>
+
+        <div class="step" id="step-3" onclick="highlightStep(3)">
+          <div class="step-top">
+            <span class="num">03 · BAKERY</span>
+            <span>👩‍🍳</span>
+          </div>
+          <div class="step-title">Prep task ready to review</div>
+          <div class="step-desc">Baker sees clear prep notes and confirms details directly with the customer.</div>
+        </div>
+      </div>
+
+      <div class="foot">
+        <span>🛡️ <strong>Bakery stays in control:</strong> The owner confirms order details and final pricing; the workflow keeps prep visible.</span>
+        <span>Built for Notion Embeds</span>
+      </div>
+    </main>
+
+    <script>
+      function switchView(mode) {
+        document.getElementById("view-before").classList.toggle("active", mode === "before");
+        document.getElementById("view-after").classList.toggle("active", mode === "after");
+        document.getElementById("btn-before").classList.toggle("active", mode === "before");
+        document.getElementById("btn-after").classList.toggle("active", mode === "after");
+      }
+
+      function highlightStep(stepNum) {
+        [1, 2, 3].forEach((n) => {
+          document.getElementById(`step-${n}`).classList.toggle("active-step", n === stepNum);
+        });
+      }
+
+      function addCakeOrder() {
+        const style = document.getElementById("cakeStyle").value;
+        const diet = document.getElementById("dietNote").value;
+        const pickup = document.getElementById("pickupDate").value;
+        const list = document.getElementById("prepList");
+        const toast = document.getElementById("ownerToast");
+
+        highlightStep(1);
+        setTimeout(() => highlightStep(2), 220);
+        setTimeout(() => highlightStep(3), 500);
+
+        document.querySelectorAll(".prep-item").forEach((el) => el.classList.remove("new-highlight"));
+
+        const item = document.createElement("div");
+        item.className = "prep-item new-highlight";
+        item.innerHTML = `
+          <div>
+            <div class="cake-title">${escapeHtml(style)}</div>
+            <div class="cake-meta">📅 Calendar Pickup: ${escapeHtml(pickup)} · Prep task created</div>
+            <span class="diet-tag">${escapeHtml(diet)}</span>
+          </div>
+          <span class="prep-badge">New Prep Task</span>
+        `;
+        list.insertBefore(item, list.firstChild);
+
+        if (list.children.length > 3) {
+          list.removeChild(list.lastChild);
+        }
+
+        document.getElementById("orderCount").textContent = `${list.children.length} Orders`;
+        toast.innerHTML = `<span>🗓️ <strong>Logged & Scheduled:</strong> Added <em>${escapeHtml(style)}</em> for <strong>${escapeHtml(pickup)}</strong> with prep task ready for review.</span>`;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+    </script>
+  </body>
+</html>
