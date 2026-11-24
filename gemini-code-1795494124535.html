@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Residential Cleaning Quote Workflow</title>
+    <style>
+      :root {
+        --bg: #f6f8f5;
+        --surface: #ffffff;
+        --surface-soft: #eef3ec;
+        --primary: #2d5a43;
+        --primary-light: #437d5f;
+        --accent: #e09f3e;
+        --accent-soft: #fdf5e6;
+        --danger-soft: #fdf0ed;
+        --danger-text: #b84a39;
+        --text-main: #232d27;
+        --text-muted: #5c6b62;
+        --border: #dce4dc;
+        --radius: 16px;
+        --shadow: 0 10px 28px rgba(35, 45, 39, 0.06);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text-main);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        padding: 20px;
+      }
+
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 32px;
+        box-shadow: var(--shadow);
+      }
+
+      /* Header */
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--primary);
+        background: var(--surface-soft);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 32px;
+        font-weight: 400;
+        line-height: 1.18;
+        margin: 12px 0 8px;
+        color: var(--text-main);
+      }
+
+      .intro {
+        max-width: 600px;
+        color: var(--text-muted);
+        font-size: 15px;
+        margin: 0;
+      }
+
+      .tag {
+        border: 1px solid var(--border);
+        background: #fafcfa;
+        border-radius: 30px;
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--primary);
+        white-space: nowrap;
+      }
+
+      /* Interactive Mode Switcher */
+      .toggle-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--surface-soft);
+        padding: 8px 12px;
+        border-radius: 14px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .toggle-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-main);
+        padding-left: 6px;
+      }
+
+      .toggle-btns {
+        display: flex;
+        gap: 6px;
+        background: #dfe7de;
+        padding: 4px;
+        border-radius: 10px;
+      }
+
+      .toggle-btn {
+        border: none;
+        background: transparent;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .toggle-btn.active {
+        background: var(--surface);
+        color: var(--primary);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      }
+
+      /* Comparison Panel */
+      .view-panel {
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .view-panel.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .chaos-box {
+        background: var(--danger-soft);
+        border: 1px dashed #e5b3a8;
+        border-radius: var(--radius);
+        padding: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+
+      .messy-note {
+        background: #fff;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border-left: 3px solid var(--danger-text);
+        font-size: 12.5px;
+        color: #4a3531;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      }
+
+      .messy-note strong {
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+        color: var(--danger-text);
+        margin-bottom: 4px;
+      }
+
+      /* Interactive Demo Simulator */
+      .demo-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .sim-card {
+        background: #fafcfa;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .sim-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .form-group {
+        margin-bottom: 10px;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+      }
+
+      .form-group select,
+      .form-group input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 13px;
+        background: #fff;
+        color: var(--text-main);
+      }
+
+      .btn-run {
+        width: 100%;
+        margin-top: 8px;
+        padding: 11px;
+        border: none;
+        border-radius: 10px;
+        background: var(--primary);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-run:hover {
+        background: var(--primary-light);
+      }
+
+      .btn-run:active {
+        transform: scale(0.98);
+      }
+
+      /* Live Tracker Output */
+      .tracker-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+      }
+
+      .tracker-table th {
+        text-align: left;
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .tracker-table td {
+        padding: 10px 6px;
+        border-bottom: 1px solid #eef2ee;
+        vertical-align: middle;
+      }
+
+      .tracker-row.new-highlight {
+        background: var(--accent-soft);
+        animation: popRow 0.5s ease;
+      }
+
+      @keyframes popRow {
+        0% { transform: scale(0.97); background: #fbe6be; }
+        100% { transform: scale(1); background: var(--accent-soft); }
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .badge-new {
+        background: #fde8c8;
+        color: #9c6211;
+      }
+
+      .badge-ready {
+        background: #dff0e5;
+        color: #235c3a;
+      }
+
+      .owner-toast {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: var(--surface-soft);
+        border-left: 3px solid var(--primary);
+        font-size: 12px;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      /* Interactive Steps Bar */
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .step {
+        background: var(--surface-soft);
+        border: 1.5px solid transparent;
+        border-radius: 14px;
+        padding: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .step:hover, .step.active-step {
+        background: #fff;
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px rgba(45, 90, 67, 0.08);
+      }
+
+      .step-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+
+      .num {
+        color: var(--primary);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+
+      .step-title {
+        font-weight: 700;
+        font-size: 13.5px;
+        margin-bottom: 4px;
+        color: var(--text-main);
+      }
+
+      .step-desc {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .foot {
+        margin-top: 20px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        color: var(--text-muted);
+        font-size: 11.5px;
+      }
+
+      @media (max-width: 720px) {
+        .wrap { padding: 20px; }
+        .demo-grid { grid-template-columns: 1fr; }
+        .steps { grid-template-columns: 1fr; }
+        h1 { font-size: 26px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="top">
+        <div>
+          <div class="eyebrow">✨ Practical Workflow · Customer Inquiries</div>
+          <h1>Cleaning quote requests, organized from the start.</h1>
+          <p class="intro">
+            A residential cleaning owner shouldn't have to hunt through scattered emails to remember who asked for a quote. Test the workflow below to see how inquiries stay tidy.
+          </p>
+        </div>
+        <span class="tag">🏡 Residential Cleaning</span>
+      </div>
+
+      <!-- View Switcher -->
+      <div class="toggle-bar">
+        <span class="toggle-label">Compare the experience:</span>
+        <div class="toggle-btns">
+          <button class="toggle-btn active" id="btn-after" onclick="switchView('after')">
+            ✅ With Automation (Try It)
+          </button>
+          <button class="toggle-btn" id="btn-before" onclick="switchView('before')">
+            😫 Without Automation
+          </button>
+        </div>
+      </div>
+
+      <!-- BEFORE VIEW -->
+      <div id="view-before" class="view-panel">
+        <div class="chaos-box">
+          <div class="messy-note">
+            <strong>📩 Email #1 · 9:14 AM</strong>
+            "Hi, how much for a 3-bedroom house clean next Friday?" — <em>No phone number included.</em>
+          </div>
+          <div class="messy-note">
+            <strong>💬 Website Form · 11:42 AM</strong>
+            "Deep clean needed before move-in." — <em>Buried under 14 supplier newsletters.</em>
+          </div>
+          <div class="messy-note">
+            <strong>📱 Missed Call · 2:05 PM</strong>
+            Voicemail left while driving between jobs. Forgotten until Monday morning.
+          </div>
+        </div>
+      </div>
+
+      <!-- AFTER VIEW (INTERACTIVE SIMULATOR) -->
+      <div id="view-after" class="view-panel active">
+        <div class="demo-grid">
+          <!-- Left: Simulated Customer Form -->
+          <div class="sim-card">
+            <div>
+              <div class="sim-title">
+                <span>1. Customer Quote Form</span>
+                <span>📝 Live Demo</span>
+              </div>
+              <div class="form-group">
+                <label for="custName">Homeowner Name</label>
+                <input type="text" id="custName" value="Maya Lin" />
+              </div>
+              <div class="form-group">
+                <label for="homeSize">Home Size</label>
+                <select id="homeSize">
+                  <option value="2 Bed / 2 Bath">2 Bed / 2 Bath Condo</option>
+                  <option value="3 Bed / 2.5 Bath" selected>3 Bed / 2.5 Bath House</option>
+                  <option value="4+ Bed Family Home">4+ Bed Family Home</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="cleanType">Cleaning Type</label>
+                <select id="cleanType">
+                  <option value="Standard Bi-Weekly">Standard Bi-Weekly</option>
+                  <option value="Deep Clean" selected>Deep Clean</option>
+                  <option value="Move-Out Clean">Move-Out Clean</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-run" onclick="simulateInquiry()">
+              <span>✨ Submit Test Quote Request</span>
+            </button>
+          </div>
+
+          <!-- Right: Live Inquiry Tracker -->
+          <div class="sim-card">
+            <div>
+              <div class="sim-title">
+                <span>2. Owner's Organized Tracker</span>
+                <span id="rowCount">2 Inquiries</span>
+              </div>
+              <table class="tracker-table">
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th>Details</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="trackerBody">
+                  <tr>
+                    <td><strong>Elena R.</strong></td>
+                    <td>2 Bed · Standard</td>
+                    <td><span class="badge badge-ready">Quote Sent</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>David K.</strong></td>
+                    <td>4+ Bed · Move-Out</td>
+                    <td><span class="badge badge-ready">Quote Sent</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="owner-toast" id="ownerToast">
+              <span>🔔 <strong>Ready:</strong> Click "Submit Test Quote Request" to watch a new inquiry land here automatically.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive 3-Step Flow -->
+      <div class="steps">
+        <div class="step active-step" id="step-1" onclick="highlightStep(1)">
+          <div class="step-top">
+            <span class="num">01 · CUSTOMER</span>
+            <span>🏡</span>
+          </div>
+          <div class="step-title">Submits website form</div>
+          <div class="step-desc">Captures home size, cleaning type, and preferred dates in one structured step.</div>
+        </div>
+
+        <div class="step" id="step-2" onclick="highlightStep(2)">
+          <div class="step-top">
+            <span class="num">02 · AUTOMATION</span>
+            <span>⚡</span>
+          </div>
+          <div class="step-title">Logs into tracker</div>
+          <div class="step-desc">Instantly formats the details into a clean table—zero copy-pasting needed.</div>
+        </div>
+
+        <div class="step" id="step-3" onclick="highlightStep(3)">
+          <div class="step-top">
+            <span class="num">03 · OWNER</span>
+            <span>🤝</span>
+          </div>
+          <div class="step-title">Reviews & follows up</div>
+          <div class="step-desc">Receives a clear summary alert and sends a personal, accurate price quote.</div>
+        </div>
+      </div>
+
+      <div class="foot">
+        <span>🛡️ <strong>Human-in-the-loop:</strong> Automation organizes the request; the owner stays in full control of pricing.</span>
+        <span>Built for Notion Embeds</span>
+      </div>
+    </main>
+
+    <script>
+      const sampleNames = ["Jordan Taylor", "Samira Patel", "Liam O'Connor", "Chloe Bennett", "Noah Brooks"];
+      let sampleIndex = 0;
+
+      function switchView(mode) {
+        document.getElementById("view-before").classList.toggle("active", mode === "before");
+        document.getElementById("view-after").classList.toggle("active", mode === "after");
+        document.getElementById("btn-before").classList.toggle("active", mode === "before");
+        document.getElementById("btn-after").classList.toggle("active", mode === "after");
+      }
+
+      function highlightStep(stepNum) {
+        [1, 2, 3].forEach((n) => {
+          document.getElementById(`step-${n}`).classList.toggle("active-step", n === stepNum);
+        });
+      }
+
+      function simulateInquiry() {
+        const nameInput = document.getElementById("custName");
+        const sizeInput = document.getElementById("homeSize");
+        const typeInput = document.getElementById("cleanType");
+        const tbody = document.getElementById("trackerBody");
+        const toast = document.getElementById("ownerToast");
+
+        const name = nameInput.value.trim() || "New Homeowner";
+        const size = sizeInput.value;
+        const type = typeInput.value;
+
+        // Animate steps sequentially
+        highlightStep(1);
+        setTimeout(() => highlightStep(2), 250);
+        setTimeout(() => highlightStep(3), 550);
+
+        // Remove previous highlight
+        document.querySelectorAll(".tracker-row").forEach((r) => r.classList.remove("new-highlight"));
+
+        // Insert new row at the top
+        const row = document.createElement("tr");
+        row.className = "tracker-row new-highlight";
+        row.innerHTML = `
+          <td><strong>${escapeHtml(name)}</strong></td>
+          <td>${escapeHtml(size)} · ${escapeHtml(type)}</td>
+          <td><span class="badge badge-new">Needs Quote</span></td>
+        `;
+        tbody.insertBefore(row, tbody.firstChild);
+
+        // Keep max 4 rows so the slide stays compact inside Notion
+        if (tbody.children.length > 4) {
+          tbody.removeChild(tbody.lastChild);
+        }
+
+        // Update counter & owner alert
+        document.getElementById("rowCount").textContent = `${tbody.children.length} Inquiries`;
+        toast.innerHTML = `<span>📲 <strong>Owner Alert Sent:</strong> "${escapeHtml(name)} requested a ${escapeHtml(type)} (${escapeHtml(size)})."</span>`;
+
+        // Cycle next sample name so the user can click repeatedly
+        nameInput.value = sampleNames[sampleIndex % sampleNames.length];
+        sampleIndex++;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+    </script>
+  </body>
+</html>
