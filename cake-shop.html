@@ -1,622 +1,579 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Custom Cake Order Coordination Workflow</title>
-    <style>
-      :root {
-        --bg: #f6f8f5;
-        --surface: #ffffff;
-        --surface-soft: #eef3ec;
-        --primary: #2d5a43;
-        --primary-light: #437d5f;
-        --accent: #e09f3e;
-        --accent-soft: #fdf5e6;
-        --danger-soft: #fdf0ed;
-        --danger-text: #b84a39;
-        --text-main: #232d27;
-        --text-muted: #5c6b62;
-        --border: #dce4dc;
-        --radius: 16px;
-        --shadow: 0 10px 28px rgba(35, 45, 39, 0.06);
-      }
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Custom Cake Order Coordination Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blush: #ffe9f0;
+    --blush-2: #fff7fa;
+    --rasp: #d81b60;
+    --rasp-d: #ad1450;
+    --choc: #3a1d28;
+    --choc-2: #4d2a38;
+    --choc-soft: #7a5563;
+    --pist: #bfe6c9;
+    --pist-ink: #1d5a33;
+    --butter: #fff1a8;
+    --butter-ink: #6d5300;
+    --amber: #fde8c8;
+    --amber-ink: #9c6211;
+    --paper: #fffdfb;
+    --line: #f2c6d5;
+    --display: "Bagel Fat One", "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Outfit", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; color: var(--choc); font-family: var(--body); line-height: 1.5;
+    background: repeating-linear-gradient(90deg, var(--blush) 0 34px, var(--blush-2) 34px 68px);
+    padding: 0 16px 56px; overflow-x: hidden;
+  }
+  button, select, input { font-family: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--choc); outline-offset: 2px; }
 
-      * {
-        box-sizing: border-box;
-      }
+  /* frosting drip across the top */
+  .drip { display: flex; align-items: flex-start; height: 74px; margin: 0 -16px; position: relative; }
+  .drip::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 22px; background: var(--rasp); }
+  .drip i { position: relative; flex: 1; background: var(--rasp); border-radius: 0 0 999px 999px; margin-right: -1px; }
+  .drip i::after { content: ""; position: absolute; left: 22%; top: 8px; width: 18%; bottom: 40%; border-radius: 99px; background: rgba(255, 255, 255, .28); }
 
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text-main);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        line-height: 1.5;
-        padding: 20px;
-      }
+  .page { max-width: 1120px; margin: 0 auto; }
 
-      .wrap {
-        max-width: 960px;
-        margin: 0 auto;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 22px;
-        padding: 32px;
-        box-shadow: var(--shadow);
-      }
+  /* ---------- Masthead ---------- */
+  .masthead { text-align: center; padding: 18px 0 8px; }
+  .eyebrow { display: inline-block; margin: 0 0 14px; padding: 6px 16px; background: #fff; border-radius: 999px; font-weight: 600; font-size: 14px; color: var(--rasp-d); box-shadow: 0 0 0 2px var(--line); }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(32px, 5.6vw, 60px); line-height: 1.04; letter-spacing: -0.01em; margin: 0 auto 16px; max-width: 17ch; color: var(--choc); }
+  .intro { margin: 0 auto 18px; max-width: 60ch; font-size: 17px; color: var(--choc-soft); }
+  .tag { display: inline-block; background: var(--choc); color: #fff; border-radius: 999px; padding: 9px 20px; font-weight: 600; font-size: 14.5px; transform: rotate(-1.5deg); box-shadow: 0 8px 18px -8px rgba(58, 29, 40, .6); }
 
-      /* Header */
-      .top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 24px;
-      }
+  .switchbar { display: flex; justify-content: center; align-items: center; gap: 12px 16px; flex-wrap: wrap; margin: 28px 0 22px; }
+  .switchbar > span { font-weight: 600; font-size: 15px; }
+  .switch { display: inline-flex; background: #fff; border-radius: 999px; padding: 5px; gap: 4px; box-shadow: 0 0 0 2px var(--line); }
+  .switch button { border: 0; background: transparent; border-radius: 999px; padding: 10px 18px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background .15s, color .15s; }
+  .switch button:hover { background: var(--blush); }
+  .switch button[aria-pressed="true"] { background: var(--rasp); color: #fff; }
+  .switch button#btn-before[aria-pressed="true"] { background: var(--choc); }
 
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        color: var(--primary);
-        background: var(--surface-soft);
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
+  .panel-view[hidden] { display: none; }
 
-      h1 {
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 32px;
-        font-weight: 400;
-        line-height: 1.18;
-        margin: 12px 0 8px;
-        color: var(--text-main);
-      }
+  .tools { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .tools p { margin: 0; font-size: 14.5px; color: var(--choc-soft); }
+  .btn { border: 0; background: #fff; border-radius: 12px; padding: 9px 16px; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 0 0 2px var(--line); transition: box-shadow .15s, color .15s; }
+  .btn:hover { box-shadow: 0 0 0 2px var(--rasp); color: var(--rasp-d); }
 
-      .intro {
-        max-width: 600px;
-        color: var(--text-muted);
-        font-size: 15px;
-        margin: 0;
-      }
+  /* ---------- Main grid ---------- */
+  .stage { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 26px; align-items: start; }
+  .right { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
 
-      .tag {
-        border: 1px solid var(--border);
-        background: #fafcfa;
-        border-radius: 30px;
-        padding: 8px 14px;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--primary);
-        white-space: nowrap;
-      }
+  .pick { position: relative; display: inline-flex; align-items: center; background: #fff; border-radius: 999px; box-shadow: 0 0 0 2px var(--line); padding-left: 12px; }
+  .pick:hover { box-shadow: 0 0 0 2px var(--rasp); }
+  .pick .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--rasp); flex: none; }
+  .pick select {
+    appearance: none; -webkit-appearance: none; border: 0; background: transparent; font-weight: 600; font-size: 13.5px; cursor: pointer; padding: 8px 30px 8px 8px; color: var(--choc);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%233a1d28' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
 
-      /* Interactive Mode Switcher */
-      .toggle-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: var(--surface-soft);
-        padding: 8px 12px;
-        border-radius: 14px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
+  /* order pad (form) */
+  .pad {
+    position: relative; background: var(--paper); border-radius: 8px 8px 22px 22px; padding: 44px 24px 24px; transform: rotate(-.6deg);
+    box-shadow: 0 0 0 2px var(--line), 0 24px 40px -24px rgba(173, 20, 80, .55); transition: box-shadow .25s, transform .25s;
+  }
+  .pad::before { /* spiral holes */
+    content: ""; position: absolute; top: 12px; left: 22px; right: 22px; height: 16px;
+    background: radial-gradient(circle at 8px 8px, var(--choc) 0 5px, transparent 5.5px) 0 0 / 28px 16px repeat-x;
+  }
+  .pad::after { content: ""; position: absolute; left: 0; right: 0; top: 36px; height: 3px; background: var(--rasp); opacity: .25; }
+  .pad.is-active { transform: rotate(0deg); box-shadow: 0 0 0 3px var(--rasp), 0 28px 44px -22px rgba(173, 20, 80, .8); }
+  .pad-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  h2 { font-family: var(--display); font-weight: 400; font-size: 22px; line-height: 1.15; margin: 0; }
+  .live { font-size: 13px; font-weight: 600; background: var(--butter); color: var(--butter-ink); padding: 3px 11px; border-radius: 999px; }
+  .pad .pick { margin-bottom: 14px; }
+  .field { margin-bottom: 12px; }
+  .field > label { display: block; font-size: 13px; font-weight: 600; color: var(--choc-soft); margin-bottom: 4px; }
+  .field input[type="text"], .field select {
+    width: 100%; padding: 10px 12px; border: 0; border-radius: 12px; background: var(--blush-2); box-shadow: inset 0 0 0 2px var(--line); font-size: 15px; color: var(--choc);
+  }
+  .field input:focus-visible, .field select:focus-visible { outline: 0; box-shadow: inset 0 0 0 2.5px var(--rasp); }
+  .field.invalid input { box-shadow: inset 0 0 0 2.5px #c0334d; background: #ffe6ea; }
+  .err { display: none; font-size: 12.5px; font-weight: 600; color: #c0334d; margin-top: 4px; }
+  .field.invalid .err { display: block; }
+  .field .icing { font-family: "Segoe Script", "Bradley Hand", "Brush Script MT", cursive; font-size: 18px; color: var(--rasp-d); }
+  .create {
+    width: 100%; margin-top: 8px; padding: 15px; border: 0; border-radius: 16px; background: var(--rasp); color: #fff; font-weight: 700; font-size: 16px; cursor: pointer;
+    box-shadow: 0 6px 0 var(--rasp-d); transition: transform .08s, box-shadow .08s, background .15s;
+  }
+  .create:hover { background: #e32a6e; }
+  .create:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--rasp-d); }
+  .create:disabled { opacity: .65; cursor: wait; }
 
-      .toggle-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text-main);
-        padding-left: 6px;
-      }
+  /* ticket rail board */
+  .board { background: var(--choc); color: #fff; border-radius: 26px; padding: 22px 22px 20px; box-shadow: 0 0 0 2px var(--choc), 0 24px 40px -24px rgba(58, 29, 40, .8); transition: box-shadow .25s; }
+  .board.is-active { box-shadow: 0 0 0 4px var(--rasp), 0 28px 44px -22px rgba(216, 27, 96, .7); }
+  .board-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .board h2 { color: #fff; }
+  .count { font-weight: 600; font-size: 14px; background: rgba(255, 255, 255, .14); padding: 4px 12px; border-radius: 999px; }
+  .board .pick { background: #fff; }
+  .rail-wrap { position: relative; padding-top: 30px; }
+  .steel { position: absolute; top: 8px; left: -6px; right: -6px; height: 14px; border-radius: 7px; background: linear-gradient(#f2f5f7, #9aa6b0 55%, #d3dadf); box-shadow: 0 3px 6px rgba(0, 0, 0, .35); }
+  .tickets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding-bottom: 14px; min-height: 250px; }
+  .ticket { position: relative; background: var(--paper); color: var(--choc); padding: 22px 14px 16px; border-radius: 4px 4px 0 0; display: flex; flex-direction: column; gap: 5px; transform-origin: top center; }
+  .ticket::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -8px; height: 8px;
+    background: linear-gradient(135deg, var(--paper) 25%, transparent 25%) -6px 0, linear-gradient(225deg, var(--paper) 25%, transparent 25%) -6px 0;
+    background-size: 12px 12px;
+  }
+  .ticket.hl { outline: 3px solid var(--butter); outline-offset: 2px; }
+  .ticket.fresh { background: #fffbe8; }
+  .ticket.fresh::after { background: linear-gradient(135deg, #fffbe8 25%, transparent 25%) -6px 0, linear-gradient(225deg, #fffbe8 25%, transparent 25%) -6px 0; background-size: 12px 12px; }
+  .ticket.print { animation: print .65s cubic-bezier(.2, .9, .3, 1.15); }
+  @keyframes print { 0% { transform: translateY(-46px) scaleY(.35) rotate(-2deg); opacity: 0; } 70% { opacity: 1; } 100% { transform: none; opacity: 1; } }
+  .clip { position: absolute; top: -22px; left: 50%; width: 24px; height: 32px; margin-left: -12px; border-radius: 5px 5px 9px 9px; background: linear-gradient(90deg, #232329, #4a4a55 50%, #232329); box-shadow: 0 3px 5px rgba(0, 0, 0, .4); }
+  .t-title { font-weight: 700; font-size: 14.5px; line-height: 1.25; }
+  .t-for { font-size: 12.5px; font-weight: 600; color: var(--rasp-d); }
+  .t-msg { font-family: "Segoe Script", "Bradley Hand", "Brush Script MT", cursive; font-size: 14px; color: var(--rasp-d); line-height: 1.25; }
+  .t-meta { font-size: 12.5px; color: var(--choc-soft); line-height: 1.35; }
+  .diet { align-self: flex-start; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--pist); color: var(--pist-ink); }
+  .badge { align-self: flex-start; margin-top: auto; border: 0; border-radius: 999px; padding: 5px 12px; font-weight: 700; font-size: 12.5px; cursor: pointer; background: var(--amber); color: var(--amber-ink); transition: transform .1s; white-space: nowrap; }
+  .badge:hover { transform: scale(1.06); }
+  .badge.s-new { background: var(--butter); color: var(--butter-ink); box-shadow: inset 0 0 0 2px #f0d24a; }
+  .badge.s-prep { background: var(--pist); color: var(--pist-ink); }
+  .badge.s-ready { background: var(--pist-ink); color: #fff; }
+  .note { margin-top: 12px; padding: 11px 14px; border-radius: 14px; background: rgba(255, 255, 255, .12); border-left: 4px solid var(--butter); font-size: 14px; }
 
-      .toggle-btns {
-        display: flex;
-        gap: 6px;
-        background: #dfe7de;
-        padding: 4px;
-        border-radius: 10px;
-      }
+  /* pickup calendar */
+  .cal { background: var(--paper); border-radius: 26px; padding: 20px 20px 22px; box-shadow: 0 0 0 2px var(--line), 0 24px 40px -26px rgba(173, 20, 80, .5); transition: box-shadow .25s; }
+  .cal.is-active { box-shadow: 0 0 0 3px var(--rasp), 0 28px 44px -22px rgba(173, 20, 80, .8); }
+  .cal-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .days { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .day { background: #fff; border-radius: 14px; box-shadow: 0 0 0 2px var(--line); overflow: hidden; min-height: 112px; }
+  .day h3 { margin: 0; background: var(--rasp); color: #fff; font-family: var(--display); font-weight: 400; font-size: 15px; text-align: center; padding: 4px 0; }
+  .day ul { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .empty { font-size: 12.5px; color: var(--choc-soft); text-align: center; padding: 8px 4px; opacity: .8; }
+  .chip { display: block; width: 100%; text-align: left; border: 0; border-radius: 10px; padding: 6px 8px; font-size: 12.5px; line-height: 1.3; font-weight: 600; cursor: pointer; background: var(--amber); color: var(--amber-ink); transition: transform .1s; }
+  .chip:hover { transform: scale(1.03); }
+  .chip small { display: block; font-weight: 500; opacity: .85; }
+  .chip.s-new { background: var(--butter); color: var(--butter-ink); }
+  .chip.s-prep { background: var(--pist); color: var(--pist-ink); }
+  .chip.s-ready { background: var(--pist-ink); color: #fff; }
+  .chip.pop { animation: chipPop .5s cubic-bezier(.2, .9, .3, 1.3); }
+  @keyframes chipPop { 0% { transform: scale(.4) translateY(-14px); opacity: 0; } 100% { transform: none; opacity: 1; } }
 
-      .toggle-btn {
-        border: none;
-        background: transparent;
-        padding: 7px 14px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--text-muted);
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
+  .flex-note { margin-top: 24px; padding: 14px 20px; border-radius: 18px; background: #fff; box-shadow: 0 0 0 2px var(--line); font-size: 14.5px; color: var(--choc-soft); }
+  .flex-note strong { color: var(--choc); }
 
-      .toggle-btn.active {
-        background: var(--surface);
-        color: var(--primary);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      }
+  /* scattered orders */
+  .mess { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; align-items: start; padding: 10px 0 6px; }
+  .m-card { position: relative; font-size: 15.5px; }
+  .m-card strong { display: block; font-family: var(--display); font-weight: 400; font-size: 18px; margin-bottom: 6px; }
+  .m-dm { background: linear-gradient(135deg, #8a3ffc, #e1306c 60%, #fd8d32); color: #fff; padding: 20px 20px 22px; border-radius: 26px 26px 26px 6px; transform: rotate(-2deg); box-shadow: 0 16px 28px -16px rgba(138, 63, 252, .7); }
+  .m-mail { background: #fff; padding: 52px 20px 22px; border-radius: 10px; transform: rotate(1.4deg) translateY(14px); box-shadow: 0 0 0 2px var(--line), 0 16px 28px -18px rgba(58, 29, 40, .6); overflow: hidden; }
+  .m-mail::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 38px; background: linear-gradient(to bottom right, var(--blush) 50%, transparent 50%) left / 50% 100% no-repeat, linear-gradient(to bottom left, var(--blush) 50%, transparent 50%) right / 50% 100% no-repeat; }
+  .m-napkin { background: #fffef7; padding: 22px 20px; border-radius: 4px; transform: rotate(-1deg); box-shadow: 0 16px 28px -18px rgba(58, 29, 40, .6); background-image: radial-gradient(circle at 82% 78%, rgba(216, 27, 96, .16) 0 26px, transparent 27px), radial-gradient(circle at 18% 30%, rgba(122, 85, 99, .12) 0 12px, transparent 13px); border: 2px dashed var(--line); }
+  .m-napkin strong { text-decoration: underline wavy var(--rasp); text-underline-offset: 4px; }
 
-      /* Views */
-      .view-panel {
-        display: none;
-        animation: fadeIn 0.3s ease;
-      }
+  /* steps under an awning */
+  .awning { margin-top: 36px; background: var(--paper); border-radius: 0 0 26px 26px; box-shadow: 0 0 0 2px var(--line); padding: 54px 18px 18px; position: relative; }
+  .awning::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 38px; border-radius: 0;
+    background: radial-gradient(circle at 30px 0, var(--rasp) 0 29px, transparent 30px) 0 0 / 120px 38px repeat-x, radial-gradient(circle at 90px 0, #fff 0 29px, transparent 30px) 0 0 / 120px 38px repeat-x;
+  }
+  .awning::after { content: ""; position: absolute; left: 0; right: 0; top: -14px; height: 14px; background: repeating-linear-gradient(90deg, var(--rasp) 0 60px, #fff 60px 120px); box-shadow: 0 0 0 2px var(--line); }
+  .steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .step { display: grid; grid-template-columns: 44px 1fr; gap: 12px; text-align: left; width: 100%; border: 0; background: var(--blush-2); border-radius: 18px; padding: 14px 16px 14px 12px; cursor: pointer; box-shadow: 0 0 0 2px var(--line); transition: background .2s, box-shadow .2s, transform .15s; }
+  .step:hover { background: var(--blush); }
+  .step[aria-current="step"] { background: var(--butter); box-shadow: 0 0 0 3px var(--rasp); transform: translateY(-3px); }
+  .node { width: 38px; height: 38px; border-radius: 50%; background: var(--rasp); color: #fff; display: grid; place-items: center; font-family: var(--display); font-size: 18px; margin: 2px 0 0 4px; }
+  .step-kind { display: flex; justify-content: space-between; font-size: 13.5px; font-weight: 600; color: var(--rasp-d); }
+  .step-title { display: block; font-family: var(--display); font-weight: 400; font-size: 17px; line-height: 1.2; margin: 2px 0 5px; }
+  .step-desc { display: block; font-size: 14px; color: var(--choc-soft); line-height: 1.4; }
+  .step[aria-current="step"] .step-desc { color: var(--choc); }
 
-      .view-panel.active {
-        display: block;
-      }
+  .foot { margin-top: 28px; padding-top: 16px; border-top: 2px solid var(--choc); display: flex; justify-content: space-between; gap: 10px 20px; flex-wrap: wrap; font-size: 14px; color: var(--choc-soft); }
+  .foot strong { color: var(--choc); }
 
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(4px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
+  .toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 24px); background: var(--choc); color: #fff; padding: 11px 20px; border-radius: 999px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; max-width: 92vw; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-      .chaos-box {
-        background: var(--danger-soft);
-        border: 1px dashed #e5b3a8;
-        border-radius: var(--radius);
-        padding: 20px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 12px;
-      }
+  @media (max-width: 960px) {
+    .stage { grid-template-columns: 1fr; }
+    .mess { grid-template-columns: 1fr; gap: 22px; }
+    .m-mail { transform: rotate(1deg); }
+    .steps { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .tickets { grid-template-columns: 1fr; padding-top: 6px; }
+    .ticket { margin-top: 12px; }
+    .days { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pad { padding: 44px 16px 18px; transform: none; }
+    .board { padding: 18px 16px; }
+    .cal { padding: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="drip" aria-hidden="true">
+  <i style="height:34px"></i><i style="height:56px"></i><i style="height:30px"></i><i style="height:48px"></i><i style="height:26px"></i><i style="height:62px"></i><i style="height:36px"></i>
+  <i style="height:52px"></i><i style="height:28px"></i><i style="height:44px"></i><i style="height:58px"></i><i style="height:32px"></i><i style="height:50px"></i><i style="height:38px"></i>
+</div>
 
-      .messy-note {
-        background: #fff;
-        padding: 12px 14px;
-        border-radius: 10px;
-        border-left: 3px solid var(--danger-text);
-        font-size: 12.5px;
-        color: #4a3531;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-      }
+<div class="page">
+  <header class="masthead">
+    <p class="eyebrow">🎂 Practical Workflow · Order Coordination</p>
+    <h1>From custom cake request to a clear prep plan.</h1>
+    <p class="intro">Custom cake orders carry important details—design, servings, dietary notes, and pickup dates. Test how a new request turns into an organized prep task.</p>
+    <span class="tag">🧁 Independent Cake Bakery</span>
+  </header>
 
-      .messy-note strong {
-        display: block;
-        font-size: 11px;
-        text-transform: uppercase;
-        color: var(--danger-text);
-        margin-bottom: 4px;
-      }
+  <div class="switchbar">
+    <span>Compare the bakery workflow:</span>
+    <div class="switch" role="group" aria-label="Compare the bakery workflow">
+      <button type="button" id="btn-after" aria-pressed="true">✅ Organized Prep Plan (Try It)</button>
+      <button type="button" id="btn-before" aria-pressed="false">😫 Scattered Orders</button>
+    </div>
+  </div>
 
-      /* Simulator Grid */
-      .demo-grid {
-        display: grid;
-        grid-template-columns: 1fr 1.15fr;
-        gap: 18px;
-        align-items: stretch;
-      }
+  <!-- BEFORE -->
+  <section class="panel-view" id="view-before" hidden>
+    <div class="mess">
+      <div class="m-card m-dm"><strong>📩 DM &amp; Email Mix-Up</strong>Customer asked for "nut-free floral buttercream" in an Instagram DM, while size and pickup date were in a separate email.</div>
+      <div class="m-card m-mail"><strong>📅 Unlogged Pickup Date</strong>Order sat in the inbox without a calendar slot until the baker checked messages late at night.</div>
+      <div class="m-card m-napkin"><strong>📝 Manual Prep Guessing</strong>Hard to tell at a glance what sponges to bake first versus what needs decorating tomorrow.</div>
+    </div>
+  </section>
 
-      .sim-card {
-        background: #fafcfa;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
+  <!-- AFTER -->
+  <section class="panel-view" id="view-after">
+    <div class="tools">
+      <p>Change any tool with the menu on its card, then create an order.</p>
+      <button type="button" class="btn" id="resetBtn">↺ Reset demo</button>
+    </div>
 
-      .sim-title {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .form-group {
-        margin-bottom: 10px;
-      }
-
-      .form-group label {
-        display: block;
-        font-size: 11.5px;
-        font-weight: 600;
-        color: var(--text-muted);
-        margin-bottom: 4px;
-      }
-
-      .form-group select,
-      .form-group input {
-        width: 100%;
-        padding: 8px 10px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        font-size: 13px;
-        background: #fff;
-        color: var(--text-main);
-      }
-
-      .btn-run {
-        width: 100%;
-        margin-top: 8px;
-        padding: 11px;
-        border: none;
-        border-radius: 10px;
-        background: var(--primary);
-        color: #fff;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s, transform 0.1s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
-
-      .btn-run:hover {
-        background: var(--primary-light);
-      }
-
-      .btn-run:active {
-        transform: scale(0.98);
-      }
-
-      /* Prep Plan & Calendar Output */
-      .prep-list {
-        display: flex;
-        flex-direction: column;
-        gap: 9px;
-      }
-
-      .prep-item {
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 11px 13px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .prep-item.new-highlight {
-        background: var(--accent-soft);
-        border-color: var(--accent);
-        animation: popCard 0.45s ease;
-      }
-
-      @keyframes popCard {
-        0% { transform: scale(0.97); }
-        100% { transform: scale(1); }
-      }
-
-      .cake-title {
-        font-weight: 700;
-        font-size: 13px;
-        color: var(--text-main);
-      }
-
-      .cake-meta {
-        font-size: 11.5px;
-        color: var(--text-muted);
-        margin-top: 2px;
-      }
-
-      .diet-tag {
-        display: inline-block;
-        margin-top: 4px;
-        padding: 2px 7px;
-        border-radius: 8px;
-        font-size: 10.5px;
-        font-weight: 600;
-        background: var(--surface-soft);
-        color: var(--primary);
-      }
-
-      .prep-badge {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 4px 9px;
-        border-radius: 12px;
-        background: #fde8c8;
-        color: #9c6211;
-        white-space: nowrap;
-      }
-
-      .prep-badge.done {
-        background: #dff0e5;
-        color: #235c3a;
-      }
-
-      .owner-toast {
-        margin-top: 12px;
-        padding: 10px 12px;
-        border-radius: 10px;
-        background: var(--surface-soft);
-        border-left: 3px solid var(--primary);
-        font-size: 12px;
-        color: var(--text-main);
-      }
-
-      /* Interactive 3-Step Flow */
-      .steps {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-top: 22px;
-      }
-
-      .step {
-        background: var(--surface-soft);
-        border: 1.5px solid transparent;
-        border-radius: 14px;
-        padding: 14px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-
-      .step:hover, .step.active-step {
-        background: #fff;
-        border-color: var(--primary);
-        box-shadow: 0 4px 12px rgba(45, 90, 67, 0.08);
-      }
-
-      .step-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 6px;
-      }
-
-      .num {
-        color: var(--primary);
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-      }
-
-      .step-title {
-        font-weight: 700;
-        font-size: 13.5px;
-        margin-bottom: 4px;
-        color: var(--text-main);
-      }
-
-      .step-desc {
-        font-size: 12px;
-        color: var(--text-muted);
-      }
-
-      .foot {
-        margin-top: 20px;
-        padding-top: 14px;
-        border-top: 1px solid var(--border);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        color: var(--text-muted);
-        font-size: 11.5px;
-      }
-
-      @media (max-width: 720px) {
-        .wrap { padding: 20px; }
-        .demo-grid { grid-template-columns: 1fr; }
-        .steps { grid-template-columns: 1fr; }
-        h1 { font-size: 26px; }
-      }
-    </style>
-  </head>
-  <body>
-    <main class="wrap">
-      <div class="top">
-        <div>
-          <div class="eyebrow">🎂 Practical Workflow · Order Coordination</div>
-          <h1>From custom cake request to a clear prep plan.</h1>
-          <p class="intro">
-            Custom cake orders carry important details—design, servings, dietary notes, and pickup dates. Test how a new request turns into an organized prep task.
-          </p>
+    <div class="stage">
+      <!-- 1. Order pad -->
+      <div class="pad is-active" id="card-1">
+        <div class="pad-head">
+          <h2>1. Custom Cake Request</h2>
+          <span class="live">🍰 Live Demo</span>
         </div>
-        <span class="tag">🧁 Independent Cake Bakery</span>
+        <label class="pick"><span class="dot" id="dot-form"></span><select id="sel-form" aria-label="Order form tool"></select></label>
+        <div class="field" id="f-name">
+          <label for="custName">Customer Name</label>
+          <input type="text" id="custName" value="Priya S." autocomplete="off" />
+          <div class="err">Please enter a customer name.</div>
+        </div>
+        <div class="field">
+          <label for="cakeStyle">Design &amp; Size</label>
+          <select id="cakeStyle">
+            <option value="2-Tier Botanical (24 servings)" selected>2-Tier Botanical (24 servings)</option>
+            <option value="Vintage Lambeth Heart (12 servings)">Vintage Lambeth Heart (12 servings)</option>
+            <option value="Classic Celebration Sheet (36 servings)">Classic Celebration Sheet (36 servings)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="dietNote">Dietary &amp; Flavor Note</label>
+          <select id="dietNote">
+            <option value="Lemon Vanilla · Nut-Free" selected>Lemon Vanilla · Nut-Free</option>
+            <option value="Chocolate Ganache · Eggless">Chocolate Ganache · Eggless</option>
+            <option value="Strawberry Cream · Standard">Strawberry Cream · Standard</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="pickupDate">Requested Pickup</label>
+          <select id="pickupDate">
+            <option value="Sat · 2:00 PM" selected>Saturday · 2:00 PM</option>
+            <option value="Sun · 11:30 AM">Sunday · 11:30 AM</option>
+            <option value="Fri · 4:00 PM">Friday · 4:00 PM</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cakeMsg">Message on the Cake</label>
+          <input type="text" class="icing" id="cakeMsg" value="Happy Birthday Ella" maxlength="36" autocomplete="off" />
+        </div>
+        <button type="button" class="create" id="createBtn">✨ Create Order &amp; Prep Task</button>
       </div>
 
-      <!-- View Switcher -->
-      <div class="toggle-bar">
-        <span class="toggle-label">Compare the bakery workflow:</span>
-        <div class="toggle-btns">
-          <button class="toggle-btn active" id="btn-after" onclick="switchView('after')">
-            ✅ Organized Prep Plan (Try It)
-          </button>
-          <button class="toggle-btn" id="btn-before" onclick="switchView('before')">
-            😫 Scattered Orders
-          </button>
+      <div class="right">
+        <!-- 2. Tracker & prep queue on the ticket rail -->
+        <div class="board" id="card-3">
+          <div class="board-head">
+            <h2>2. Order Tracker &amp; Prep Queue</h2>
+            <span class="count" id="orderCount">2 Orders</span>
+          </div>
+          <label class="pick"><span class="dot" id="dot-tracker"></span><select id="sel-tracker" aria-label="Tracker tool"></select></label>
+          <div class="rail-wrap">
+            <div class="steel" aria-hidden="true"></div>
+            <div class="tickets" id="tickets"></div>
+          </div>
+          <div class="note" id="ownerToast"></div>
+        </div>
+
+        <!-- Pickup calendar -->
+        <div class="cal" id="card-2">
+          <div class="cal-head">
+            <h2>Pickup calendar</h2>
+            <label class="pick"><span class="dot" id="dot-calendar"></span><select id="sel-calendar" aria-label="Calendar tool"></select></label>
+          </div>
+          <div class="days" id="days"></div>
         </div>
       </div>
+    </div>
 
-      <!-- BEFORE VIEW -->
-      <div id="view-before" class="view-panel">
-        <div class="chaos-box">
-          <div class="messy-note">
-            <strong>📩 DM & Email Mix-Up</strong>
-            Customer asked for "nut-free floral buttercream" in an Instagram DM, while size and pickup date were in a separate email.
-          </div>
-          <div class="messy-note">
-            <strong>📅 Unlogged Pickup Date</strong>
-            Order sat in the inbox without a calendar slot until the baker checked messages late at night.
-          </div>
-          <div class="messy-note">
-            <strong>📝 Manual Prep Guessing</strong>
-            Hard to tell at a glance what sponges to bake first versus what needs decorating tomorrow.
-          </div>
-        </div>
-      </div>
+    <div class="flex-note">
+      <strong>Flexible tool stack:</strong> The applications shown are examples. Use the menu on each card to try other combinations. Any platforms of your choice can be connected for the exact same purpose.
+    </div>
+  </section>
 
-      <!-- AFTER VIEW (INTERACTIVE SIMULATOR) -->
-      <div id="view-after" class="view-panel active">
-        <div class="demo-grid">
-          <!-- Left: Custom Cake Order Form -->
-          <div class="sim-card">
-            <div>
-              <div class="sim-title">
-                <span>1. Custom Cake Request</span>
-                <span>🍰 Live Demo</span>
-              </div>
-              <div class="form-group">
-                <label for="cakeStyle">Design & Size</label>
-                <select id="cakeStyle">
-                  <option value="2-Tier Botanical (24 servings)" selected>2-Tier Botanical (24 servings)</option>
-                  <option value="Vintage Lambeth Heart (12 servings)">Vintage Lambeth Heart (12 servings)</option>
-                  <option value="Classic Celebration Sheet (36 servings)">Classic Celebration Sheet (36 servings)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="dietNote">Dietary & Flavor Note</label>
-                <select id="dietNote">
-                  <option value="Lemon Vanilla · Nut-Free" selected>Lemon Vanilla · Nut-Free</option>
-                  <option value="Chocolate Ganache · Eggless">Chocolate Ganache · Eggless</option>
-                  <option value="Strawberry Cream · Standard">Strawberry Cream · Standard</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="pickupDate">Requested Pickup</label>
-                <select id="pickupDate">
-                  <option value="Sat · 2:00 PM" selected>Saturday · 2:00 PM</option>
-                  <option value="Sun · 11:30 AM">Sunday · 11:30 AM</option>
-                  <option value="Fri · 4:00 PM">Friday · 4:00 PM</option>
-                </select>
-              </div>
-            </div>
-            <button class="btn-run" onclick="addCakeOrder()">
-              <span>✨ Create Order & Prep Task</span>
-            </button>
-          </div>
+  <div class="awning">
+    <div class="steps" id="steps">
+      <button type="button" class="step" data-step="1" aria-current="step">
+        <span class="node">1</span>
+        <span>
+          <span class="step-kind"><span>Customer</span><span>🎂</span></span>
+          <span class="step-title">Submits cake order form</span>
+          <span class="step-desc">Captures style, servings, dietary notes, and pickup date in one spot.</span>
+        </span>
+      </button>
+      <button type="button" class="step" data-step="2">
+        <span class="node">2</span>
+        <span>
+          <span class="step-kind"><span>Automation</span><span>🗓️</span></span>
+          <span class="step-title">Logs order &amp; calendar slot</span>
+          <span class="step-desc">Saves the order record and places the pickup date on the bakery calendar.</span>
+        </span>
+      </button>
+      <button type="button" class="step" data-step="3">
+        <span class="node">3</span>
+        <span>
+          <span class="step-kind"><span>Bakery</span><span>👩‍🍳</span></span>
+          <span class="step-title">Prep task ready to review</span>
+          <span class="step-desc">Baker sees clear prep notes and confirms details directly with the customer.</span>
+        </span>
+      </button>
+      <button type="button" class="step" data-step="4">
+        <span class="node">4</span>
+        <span>
+          <span class="step-kind"><span>Automation</span><span>✨</span></span>
+          <span class="step-title">Syncs status to calendar</span>
+          <span class="step-desc">When you mark an order Ready in your tracker, the pickup calendar updates automatically.</span>
+        </span>
+      </button>
+    </div>
+  </div>
 
-          <!-- Right: Bakery Order Tracker & Prep Queue -->
-          <div class="sim-card">
-            <div>
-              <div class="sim-title">
-                <span>2. Order Tracker & Prep Queue</span>
-                <span id="orderCount">2 Orders</span>
-              </div>
-              <div class="prep-list" id="prepList">
-                <div class="prep-item">
-                  <div>
-                    <div class="cake-title">6" Berry Chantilly (10 servings)</div>
-                    <div class="cake-meta">📅 Pickup: Thu · 1:00 PM · Prep: Bake sponge & whip cream</div>
-                    <span class="diet-tag">Standard Dairy</span>
-                  </div>
-                  <span class="prep-badge done">In Prep ✓</span>
-                </div>
-                <div class="prep-item">
-                  <div>
-                    <div class="cake-title">3-Tier Marble Celebration (40 servings)</div>
-                    <div class="cake-meta">📅 Pickup: Sat · 12:00 PM · Prep: Dowel tiers & ganache</div>
-                    <span class="diet-tag">Nut-Free</span>
-                  </div>
-                  <span class="prep-badge">Queued</span>
-                </div>
-              </div>
-            </div>
+  <footer class="foot">
+    <span>🛡️ <strong>Bakery stays in control:</strong> The owner confirms order details and final pricing; the workflow keeps prep visible.</span>
+    <span>Built for Notion Embeds</span>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
 
-            <div class="owner-toast" id="ownerToast">
-              <span>📋 <strong>Ready:</strong> Submit a cake request to generate an order record, calendar pickup slot, and prep task.</span>
-            </div>
-          </div>
-        </div>
-      </div>
+<script>
+(function () {
+  "use strict";
 
-      <!-- Interactive 3-Step Flow -->
-      <div class="steps">
-        <div class="step active-step" id="step-1" onclick="highlightStep(1)">
-          <div class="step-top">
-            <span class="num">01 · CUSTOMER</span>
-            <span>🎂</span>
-          </div>
-          <div class="step-title">Submits cake order form</div>
-          <div class="step-desc">Captures style, servings, dietary notes, and pickup date in one spot.</div>
-        </div>
+  var STACK = {
+    form:     { "Jotform": "#ff6100", "Typeform": "#262627", "Google Forms": "#7248b9" },
+    tracker:  { "Airtable": "#18bfff", "Google Sheets": "#188038", "Notion": "#111111" },
+    calendar: { "Google Calendar": "#4285f4", "Apple Calendar": "#ff3b30", "Outlook Calendar": "#0a64ad" }
+  };
+  var DAYS = ["Thu", "Fri", "Sat", "Sun"];
+  var CYCLE = ["Queued", "In Prep ✓", "Ready ✓"];
+  var MAX_ORDERS = 3;
+  var SAMPLES = [
+    { name: "Marcus T.", msg: "Congratulations Sam!" },
+    { name: "Elena R.",  msg: "Happy Anniversary Mom & Dad" },
+    { name: "Jordan K.", msg: "Welcome Baby Noor" },
+    { name: "Hannah L.", msg: "Happy Birthday Ella" }
+  ];
+  var READY_NOTE = '📋 <strong>Ready:</strong> Submit a cake request to generate an order record, calendar pickup slot, and prep task.';
 
-        <div class="step" id="step-2" onclick="highlightStep(2)">
-          <div class="step-top">
-            <span class="num">02 · AUTOMATION</span>
-            <span>🗓️</span>
-          </div>
-          <div class="step-title">Logs order & calendar slot</div>
-          <div class="step-desc">Saves the order record and places the pickup date on the bakery calendar.</div>
-        </div>
+  var sel = { form: "Jotform", tracker: "Airtable", calendar: "Google Calendar" };
+  var orders = [], nextId = 1, sampleIdx = 0, step = 1;
+  var busy = false, timers = [], toastTimer = null, noteHtml = READY_NOTE;
 
-        <div class="step" id="step-3" onclick="highlightStep(3)">
-          <div class="step-top">
-            <span class="num">03 · BAKERY</span>
-            <span>👩‍🍳</span>
-          </div>
-          <div class="step-title">Prep task ready to review</div>
-          <div class="step-desc">Baker sees clear prep notes and confirms details directly with the customer.</div>
-        </div>
-      </div>
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+  function toast(msg) {
+    var el = $("toast"); el.textContent = msg; el.classList.add("show");
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2200);
+  }
+  function minutes(t) {
+    var m = /(\d+):(\d+)\s*(AM|PM)/i.exec(t); if (!m) return 0;
+    var h = Number(m[1]) % 12; if (m[3].toUpperCase() === "PM") h += 12;
+    return h * 60 + Number(m[2]);
+  }
+  function statusClass(s) { return s === "New Prep Task" ? "s-new" : s === "In Prep ✓" ? "s-prep" : s === "Ready ✓" ? "s-ready" : "s-queued"; }
+  function shortName(title) { return title.replace(/\s*\(.*\)\s*$/, ""); }
 
-      <div class="foot">
-        <span>🛡️ <strong>Bakery stays in control:</strong> The owner confirms order details and final pricing; the workflow keeps prep visible.</span>
-        <span>Built for Notion Embeds</span>
-      </div>
-    </main>
+  function seed() {
+    nextId = 1;
+    orders = [
+      { id: nextId++, title: '6" Berry Chantilly (10 servings)', day: "Thu", time: "1:00 PM", diet: "Standard Dairy",
+        meta: "📅 Pickup: Thu · 1:00 PM · Prep: Bake sponge & whip cream", status: "In Prep ✓", name: "", msg: "", fresh: false },
+      { id: nextId++, title: "3-Tier Marble Celebration (40 servings)", day: "Sat", time: "12:00 PM", diet: "Nut-Free",
+        meta: "📅 Pickup: Sat · 12:00 PM · Prep: Dowel tiers & ganache", status: "Queued", name: "", msg: "", fresh: false }
+    ];
+    noteHtml = READY_NOTE;
+  }
 
-    <script>
-      function switchView(mode) {
-        document.getElementById("view-before").classList.toggle("active", mode === "before");
-        document.getElementById("view-after").classList.toggle("active", mode === "after");
-        document.getElementById("btn-before").classList.toggle("active", mode === "before");
-        document.getElementById("btn-after").classList.toggle("active", mode === "after");
-      }
+  /* ---------- Rendering ---------- */
+  function renderTickets(printId) {
+    $("tickets").innerHTML = orders.map(function (o) {
+      return '<article class="ticket' + (o.fresh ? " fresh" : "") + (o.id === printId ? " print" : "") + '" data-id="' + o.id + '"><span class="clip"></span>' +
+        '<div class="t-title">' + esc(o.title) + "</div>" +
+        (o.name ? '<div class="t-for">For ' + esc(o.name) + "</div>" : "") +
+        (o.msg ? '<div class="t-msg">“' + esc(o.msg) + "”</div>" : "") +
+        '<div class="t-meta">' + esc(o.meta) + "</div>" +
+        '<span class="diet">' + esc(o.diet) + "</span>" +
+        '<button type="button" class="badge ' + statusClass(o.status) + '" data-id="' + o.id + '" title="Click to update prep status">' + esc(o.status) + "</button></article>";
+    }).join("");
+    $("orderCount").textContent = orders.length + (orders.length === 1 ? " Order" : " Orders");
+    $("ownerToast").innerHTML = noteHtml;
+  }
 
-      function highlightStep(stepNum) {
-        [1, 2, 3].forEach((n) => {
-          document.getElementById(`step-${n}`).classList.toggle("active-step", n === stepNum);
-        });
-      }
+  function renderCalendar(popId) {
+    $("days").innerHTML = DAYS.map(function (d) {
+      var items = orders.filter(function (o) { return o.day === d; }).sort(function (a, b) { return minutes(a.time) - minutes(b.time); });
+      var body = items.length ? items.map(function (o) {
+        return '<li><button type="button" class="chip ' + statusClass(o.status) + (o.id === popId ? " pop" : "") + '" data-id="' + o.id + '">' +
+          esc(o.time) + "<small>" + esc(shortName(o.title)) + "</small></button></li>";
+      }).join("") : '<li class="empty">Open</li>';
+      return '<div class="day"><h3>' + d + "</h3><ul>" + body + "</ul></div>";
+    }).join("");
+  }
 
-      function addCakeOrder() {
-        const style = document.getElementById("cakeStyle").value;
-        const diet = document.getElementById("dietNote").value;
-        const pickup = document.getElementById("pickupDate").value;
-        const list = document.getElementById("prepList");
-        const toast = document.getElementById("ownerToast");
+  function renderBrands() {
+    $("dot-form").style.background = STACK.form[sel.form];
+    $("dot-tracker").style.background = STACK.tracker[sel.tracker];
+    $("dot-calendar").style.background = STACK.calendar[sel.calendar];
+  }
 
-        highlightStep(1);
-        setTimeout(() => highlightStep(2), 220);
-        setTimeout(() => highlightStep(3), 500);
+  function focusStep(n) {
+    step = n;
+    $("card-1").classList.toggle("is-active", n === 1);
+    $("card-2").classList.toggle("is-active", n === 2 || n === 4);
+    $("card-3").classList.toggle("is-active", n === 3);
+    Array.prototype.forEach.call(document.querySelectorAll(".step"), function (el) {
+      if (Number(el.getAttribute("data-step")) === n) el.setAttribute("aria-current", "step"); else el.removeAttribute("aria-current");
+    });
+  }
 
-        document.querySelectorAll(".prep-item").forEach((el) => el.classList.remove("new-highlight"));
+  /* ---------- Actions ---------- */
+  function addCakeOrder() {
+    if (busy) return;
+    var name = $("custName").value.trim();
+    $("f-name").classList.toggle("invalid", !name);
+    if (!name) { $("custName").focus(); toast("Please enter a customer name."); return; }
 
-        const item = document.createElement("div");
-        item.className = "prep-item new-highlight";
-        item.innerHTML = `
-          <div>
-            <div class="cake-title">${escapeHtml(style)}</div>
-            <div class="cake-meta">📅 Calendar Pickup: ${escapeHtml(pickup)} · Prep task created</div>
-            <span class="diet-tag">${escapeHtml(diet)}</span>
-          </div>
-          <span class="prep-badge">New Prep Task</span>
-        `;
-        list.insertBefore(item, list.firstChild);
+    var style = $("cakeStyle").value, diet = $("dietNote").value, pickup = $("pickupDate").value, msg = $("cakeMsg").value.trim();
+    var parts = pickup.split(" · ");
+    var order = { id: nextId++, title: style, day: parts[0], time: parts[1], diet: diet,
+      meta: "📅 Calendar Pickup: " + pickup + " · Prep task created", status: "New Prep Task", name: name, msg: msg, fresh: true };
 
-        if (list.children.length > 3) {
-          list.removeChild(list.lastChild);
-        }
+    busy = true;
+    $("createBtn").disabled = true;
+    focusStep(1);
 
-        document.getElementById("orderCount").textContent = `${list.children.length} Orders`;
-        toast.innerHTML = `<span>🗓️ <strong>Logged & Scheduled:</strong> Added <em>${escapeHtml(style)}</em> for <strong>${escapeHtml(pickup)}</strong> with prep task ready for review.</span>`;
-      }
+    later(function () {
+      focusStep(2);
+      orders.forEach(function (o) { o.fresh = false; });
+      orders.unshift(order);
+      if (orders.length > MAX_ORDERS) orders.pop();
+      renderCalendar(order.id);
+    }, 450);
 
-      function escapeHtml(text) {
-        const div = document.createElement("div");
-        div.textContent = text;
-        return div.innerHTML;
-      }
-    </script>
-  </body>
+    later(function () {
+      focusStep(3);
+      noteHtml = '🗓️ <strong>Logged &amp; Scheduled:</strong> Added <em>' + esc(style) + "</em> for <strong>" + esc(pickup) + "</strong> with prep task ready for review.";
+      renderTickets(order.id);
+    }, 1100);
+
+    later(function () {
+      busy = false;
+      $("createBtn").disabled = false;
+    }, 1800);
+
+    var s = SAMPLES[sampleIdx % SAMPLES.length]; sampleIdx++;
+    $("custName").value = s.name;
+    $("cakeMsg").value = s.msg;
+  }
+
+  function resetDemo() {
+    clearTimers(); busy = false; $("createBtn").disabled = false;
+    seed(); sampleIdx = 0;
+    $("custName").value = "Priya S.";
+    $("cakeMsg").value = "Happy Birthday Ella";
+    $("cakeStyle").selectedIndex = 0; $("dietNote").selectedIndex = 0; $("pickupDate").selectedIndex = 0;
+    $("f-name").classList.remove("invalid");
+    renderTickets(); renderCalendar(); focusStep(1);
+    toast("Demo reset.");
+  }
+
+  function cycleStatus(id) {
+    var o = orders.filter(function (x) { return x.id === id; })[0];
+    if (!o) return;
+    var i = CYCLE.indexOf(o.status);
+    o.status = CYCLE[(i + 1) % CYCLE.length];
+    if (o.status === "Ready ✓") {
+      noteHtml = '✨ <strong>Synced to Calendar:</strong> Marked <em>' + esc(shortName(o.title)) + '</em> Ready in ' + esc(sel.tracker) + ' — ' + esc(sel.calendar) + ' updated automatically.';
+      focusStep(4);
+      renderTickets();
+      renderCalendar(o.id);
+    } else {
+      renderTickets();
+      renderCalendar();
+    }
+  }
+
+  function switchView(mode) {
+    var before = mode === "before";
+    $("view-before").hidden = !before; $("view-after").hidden = before;
+    $("btn-before").setAttribute("aria-pressed", String(before));
+    $("btn-after").setAttribute("aria-pressed", String(!before));
+  }
+
+  /* ---------- Wiring ---------- */
+  Object.keys(STACK).forEach(function (group) {
+    var s = $("sel-" + group);
+    s.innerHTML = Object.keys(STACK[group]).map(function (k) { return '<option value="' + esc(k) + '">' + esc(k) + "</option>"; }).join("");
+    s.value = sel[group];
+    s.addEventListener("change", function () { sel[group] = s.value; renderBrands(); toast("Now using " + s.value + "."); });
+  });
+
+  $("createBtn").addEventListener("click", addCakeOrder);
+  ["custName", "cakeMsg"].forEach(function (id) {
+    $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addCakeOrder(); } });
+  });
+  $("resetBtn").addEventListener("click", resetDemo);
+  $("btn-after").addEventListener("click", function () { switchView("after"); });
+  $("btn-before").addEventListener("click", function () { switchView("before"); });
+  $("steps").addEventListener("click", function (e) {
+    var b = e.target.closest(".step"); if (b) focusStep(Number(b.getAttribute("data-step")));
+  });
+  $("tickets").addEventListener("click", function (e) {
+    var b = e.target.closest(".badge"); if (b) cycleStatus(Number(b.getAttribute("data-id")));
+  });
+  $("days").addEventListener("click", function (e) {
+    var c = e.target.closest(".chip"); if (!c) return;
+    var id = c.getAttribute("data-id");
+    focusStep(3);
+    var t = document.querySelector('.ticket[data-id="' + id + '"]');
+    if (t) { t.classList.add("hl"); t.scrollIntoView({ block: "nearest", behavior: "smooth" }); setTimeout(function () { t.classList.remove("hl"); }, 1400); }
+  });
+
+  /* ---------- Init ---------- */
+  seed(); renderBrands(); renderTickets(); renderCalendar(); focusStep(1);
+})();
+</script>
+</body>
 </html>
