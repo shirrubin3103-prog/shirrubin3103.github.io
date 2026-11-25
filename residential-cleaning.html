@@ -4,332 +4,348 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Residential Cleaning Quote Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #f6f8f5;
-    --surface: #ffffff;
-    --surface-muted: #f2f5f2;
-    --primary: #2d5a43;
-    --primary-hover: #234735;
-    --danger-soft: #fdf2f0;
-    --danger-border: #e5b8b0;
-    --danger-text: #a84232;
-    --text-main: #1f2923;
-    --text-muted: #5c6b62;
-    --border: #dce4dc;
-    --radius: 14px;
-    --shadow: 0 8px 24px rgba(31, 41, 35, 0.05);
-    --alert-color: #24a1de;
+    --paper: #fafbff;
+    --ink: #14193a;
+    --muted: #5b6384;
+    --blue: #2342f5;
+    --blue-d: #1a33c9;
+    --ice: #e8edff;
+    --ice-2: #f4f6ff;
+    --edge: #cdd6ff;
+    --mint: #d9f8ea;
+    --mint-ink: #0e6b45;
+    --sun: #fff0c2;
+    --sun-ink: #7a5200;
+    --rose: #c0334d;
+    --rose-soft: #ffe6ea;
+    --display: "Unbounded", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0; background: var(--bg); color: var(--text-main);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.5; padding: 20px;
+    margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body);
+    line-height: 1.5; padding: 32px 16px 56px; position: relative; overflow-x: hidden;
   }
-  button { font-family: inherit; }
-  button:focus-visible, .step:focus-visible, input:focus-visible, select:focus-visible {
-    outline: 2px solid var(--primary); outline-offset: 2px;
+  button, select, input { font-family: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+  /* soap bubbles, purely decorative */
+  .bubbles { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .bubbles span {
+    position: absolute; border-radius: 50%; border: 1.5px solid rgba(35, 66, 245, .16);
+    background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.9), rgba(205,214,255,.25) 55%, rgba(205,214,255,0) 72%);
   }
-  .wrap {
-    max-width: 1000px; margin: 0 auto; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 20px; padding: 32px; box-shadow: var(--shadow);
+  .bubbles span:nth-child(1) { width: 220px; height: 220px; top: -60px; right: -50px; }
+  .bubbles span:nth-child(2) { width: 90px; height: 90px; top: 360px; left: -30px; }
+  .bubbles span:nth-child(3) { width: 140px; height: 140px; top: 900px; right: -40px; }
+  .bubbles span:nth-child(4) { width: 60px; height: 60px; top: 1300px; left: 40px; }
+  .bubbles span:nth-child(5) { width: 180px; height: 180px; top: 1550px; left: -70px; }
+
+  .page { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; }
+
+  /* ---------- Header ---------- */
+  .top { display: grid; grid-template-columns: 1fr auto; gap: 18px 32px; align-items: start; margin-bottom: 26px; }
+  .eyebrow { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--blue); }
+  h1 {
+    font-family: var(--display); font-weight: 700; font-size: clamp(26px, 4vw, 44px); line-height: 1.12;
+    letter-spacing: -0.03em; margin: 0 0 16px; max-width: 18ch;
   }
-  .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
-  .eyebrow {
-    display: inline-block; color: var(--primary); background: #eaf1ec; padding: 4px 12px;
-    border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-  }
-  h1 { font-family: Georgia, "Times New Roman", serif; font-size: 30px; font-weight: 400; line-height: 1.2; margin: 10px 0 8px; }
-  h2 { font-family: Georgia, "Times New Roman", serif; font-size: 20px; font-weight: 400; margin: 0 0 4px; }
-  .intro { max-width: 640px; color: var(--text-muted); font-size: 14.5px; margin: 0; }
-  .industry-tag {
-    border: 1px solid var(--border); background: var(--surface-muted); border-radius: 20px;
-    padding: 6px 14px; font-size: 12px; font-weight: 600; white-space: nowrap;
+  .intro { margin: 0; max-width: 58ch; font-size: 16.5px; color: var(--muted); }
+  .tag {
+    background: var(--blue); color: #fff; border-radius: 999px; padding: 10px 20px; font-weight: 700; font-size: 14px;
+    white-space: nowrap; box-shadow: 0 10px 22px -10px rgba(35, 66, 245, .7);
   }
 
-  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
-  .btn-ghost {
-    border: 1px solid var(--border); background: var(--surface); color: var(--text-main);
-    padding: 7px 14px; border-radius: 9px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s ease;
+  .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 34px; padding: 10px 10px 10px 18px; background: var(--ice); border-radius: 18px; }
+  .toolbar p { margin: 0; font-size: 14px; color: var(--muted); }
+  .btn {
+    border: 0; background: #fff; color: var(--ink); border-radius: 12px; padding: 9px 16px; font-weight: 700; font-size: 13.5px; cursor: pointer;
+    box-shadow: 0 0 0 1.5px var(--edge); transition: background .15s, box-shadow .15s;
   }
-  .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
-  .btn-ghost.on { background: var(--primary); border-color: var(--primary); color: #fff; }
-  .spacer { flex: 1; }
+  .btn:hover { box-shadow: 0 0 0 2px var(--blue); color: var(--blue); }
 
-  .stack-picker {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;
-    padding: 12px; border: 1px dashed var(--border); border-radius: 12px;
+  /* ---------- Journey grid ---------- */
+  .journey { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr); row-gap: 40px; }
+  .rail { grid-column: 2; grid-row: 1 / span 3; position: relative; }
+  .line { position: absolute; left: 50%; width: 4px; margin-left: -2px; border-radius: 2px; background: repeating-linear-gradient(to bottom, #aebaff 0 9px, transparent 9px 18px); }
+  .drop {
+    position: absolute; left: 50%; top: 0; width: 22px; height: 22px; z-index: 1;
+    border-radius: 50% 0 50% 50%; transform: translate(-50%, -50%) rotate(-45deg);
+    background: radial-gradient(circle at 35% 35%, #8ea0ff, var(--blue) 65%); box-shadow: 0 6px 14px -3px rgba(35, 66, 245, .8);
   }
-  .stack-group .stack-title { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
-  .chip {
-    border: 1px solid var(--border); background: var(--surface); border-radius: 16px; padding: 4px 11px;
-    font-size: 11.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all .15s ease;
+  .node {
+    align-self: start; justify-self: center; margin-top: 20px; position: relative; z-index: 2; width: 46px; height: 46px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--edge); display: grid; place-items: center;
+    font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--muted); transition: background .25s, color .25s, border-color .25s;
   }
-  .chip:hover { border-color: var(--primary); }
-  .chip.on { background: #eaf1ec; border-color: var(--primary); color: var(--primary); }
+  .node.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .node.ping::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 3px solid var(--blue); animation: ping .7s ease-out forwards; }
+  @keyframes ping { from { opacity: .9; transform: scale(1); } to { opacity: 0; transform: scale(2.1); } }
 
-  .hidden-view { display: none; }
+  .n1 { grid-column: 2; grid-row: 1; } .n2 { grid-column: 2; grid-row: 2; } .n3 { grid-column: 2; grid-row: 3; }
+  .c1 { grid-column: 1; grid-row: 1; } .t1 { grid-column: 3; grid-row: 1; }
+  .t2 { grid-column: 1; grid-row: 2; text-align: right; } .c2 { grid-column: 3; grid-row: 2; }
+  .c3 { grid-column: 1; grid-row: 3; } .t3 { grid-column: 3; grid-row: 3; }
 
-  /* Stage */
-  .stage { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch; }
-  .platform-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    display: flex; flex-direction: column; overflow: hidden; transition: border-color .25s ease, box-shadow .25s ease;
+  /* step copy */
+  .copy {
+    align-self: start; margin-top: 8px; border: 0; background: transparent; text-align: inherit; width: 100%; cursor: pointer;
+    padding: 14px 20px; border-radius: 20px; transition: background .2s, box-shadow .2s; color: var(--ink);
   }
-  .platform-card.is-active { border-color: var(--primary); box-shadow: 0 6px 18px rgba(45,90,67,.1); }
-  .app-bar {
-    padding: 10px 14px; background: var(--surface-muted); border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  }
-  .app-brand { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
-  .brand-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; background: #999; }
-  .app-meta { font-size: 11px; color: var(--text-muted); font-weight: 500; }
-  .app-body { padding: 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+  .copy:hover { background: var(--ice-2); }
+  .copy[aria-current="step"] { background: var(--ice); box-shadow: inset 0 0 0 2px var(--blue); }
+  .kicker { display: block; font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+  .copy-title { display: block; font-family: var(--display); font-weight: 500; font-size: 18px; line-height: 1.25; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .copy-desc { display: block; font-size: 14.5px; color: var(--muted); max-width: 40ch; }
+  .t2 .copy-desc { margin-left: auto; }
 
-  .field { margin-bottom: 10px; }
-  .field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+  /* cards */
+  .card {
+    align-self: start; background: #fff; border-radius: 28px; padding: 22px; box-shadow: 0 0 0 1.5px var(--edge), 0 24px 48px -28px rgba(35, 66, 245, .45);
+    transition: box-shadow .3s;
+  }
+  .card.is-active { box-shadow: 0 0 0 2.5px var(--blue), 0 28px 56px -26px rgba(35, 66, 245, .7); }
+  .card-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .meta { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+  .pick { position: relative; display: inline-flex; align-items: center; background: var(--ice-2); border-radius: 999px; box-shadow: 0 0 0 1.5px var(--edge); padding-left: 12px; }
+  .pick:hover { box-shadow: 0 0 0 2px var(--blue); }
+  .pick .dot { width: 12px; height: 12px; border-radius: 4px; background: var(--blue); flex: none; }
+  .pick select {
+    appearance: none; -webkit-appearance: none; border: 0; background: transparent; font-weight: 700; font-size: 13.5px; cursor: pointer;
+    padding: 8px 30px 8px 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2314193a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+
+  /* form */
+  .field { margin-bottom: 12px; }
+  .field > label, .field > .lbl { display: block; font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
   .field input[type="text"], .field input[type="date"], .field select {
-    width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px;
-    font-size: 12.5px; color: var(--text-main); background: #fff; font-family: inherit;
+    width: 100%; padding: 11px 13px; border: 0; border-radius: 12px; background: var(--ice-2); box-shadow: inset 0 0 0 1.5px var(--edge);
+    font-size: 14.5px; color: var(--ink);
   }
-  .field.invalid input { border-color: var(--danger-text); background: var(--danger-soft); }
-  .err { display: none; color: var(--danger-text); font-size: 11px; margin-top: 3px; }
+  .field input:focus-visible, .field select:focus-visible { outline: 0; box-shadow: inset 0 0 0 2px var(--blue); }
+  .field.invalid input { box-shadow: inset 0 0 0 2px var(--rose); background: var(--rose-soft); }
+  .err { display: none; color: var(--rose); font-size: 12px; font-weight: 600; margin-top: 4px; }
   .field.invalid .err { display: block; }
-  .addons { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--text-main); }
-  .addons label { display: flex; align-items: center; gap: 5px; font-weight: 500; color: var(--text-main); margin: 0; cursor: pointer; }
-  .btn-submit {
-    width: 100%; margin-top: 6px; padding: 10px; border: none; border-radius: 8px; background: var(--primary);
-    color: #fff; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background .2s ease, transform .1s ease;
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .addons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .addon { position: relative; cursor: pointer; }
+  .addon input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .addon span { display: inline-block; padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--ice-2); box-shadow: inset 0 0 0 1.5px var(--edge); transition: background .15s, color .15s; }
+  .addon input:checked + span { background: var(--blue); color: #fff; box-shadow: none; }
+  .addon input:focus-visible + span { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .submit {
+    width: 100%; margin-top: 8px; padding: 15px; border: 0; border-radius: 16px; background: var(--blue); color: #fff; font-weight: 700; font-size: 15px; cursor: pointer;
+    box-shadow: 0 14px 24px -12px rgba(35, 66, 245, .9); transition: background .15s, transform .1s;
   }
-  .btn-submit:hover { background: var(--primary-hover); }
-  .btn-submit:active { transform: scale(.98); }
-  .btn-submit:disabled { opacity: .6; cursor: wait; }
+  .submit:hover { background: var(--blue-d); }
+  .submit:active { transform: scale(.985); }
+  .submit:disabled { opacity: .6; cursor: wait; }
 
-  .sheet-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .sheet-table th {
-    text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .05em;
-    color: var(--text-muted); padding: 0 6px 8px; border-bottom: 1px solid var(--border);
-  }
-  .sheet-table td { padding: 9px 6px; border-bottom: 1px solid #eef2ee; vertical-align: middle; }
-  .sheet-row.highlight { background: #fef6e7; }
-  .pill {
-    display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 600;
-    border: none; cursor: pointer; transition: transform .1s ease;
-  }
-  .pill:hover { transform: scale(1.06); }
-  .pill-new { background: #fde8c8; color: #8f570c; }
-  .pill-quoted { background: #e1f2e7; color: #215737; }
-  .pill-booked { background: #dbe8fb; color: #1e4a8a; }
-  .sync-note { margin-top: 12px; font-size: 11px; color: var(--text-muted); }
+  /* tracker */
+  .sheet { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .sheet th { text-align: left; font-size: 12.5px; font-weight: 600; color: var(--muted); padding: 0 8px 10px; }
+  .sheet td { padding: 12px 8px; border-top: 1.5px solid var(--ice); vertical-align: middle; }
+  .sheet tr.fresh td { background: var(--sun); }
+  .sheet tr.fresh td:first-child { border-radius: 12px 0 0 12px; }
+  .sheet tr.fresh td:last-child { border-radius: 0 12px 12px 0; }
+  .pill { border: 0; border-radius: 999px; padding: 5px 13px; font-weight: 700; font-size: 12.5px; cursor: pointer; transition: transform .1s; }
+  .pill:hover { transform: scale(1.07); }
+  .pill-new { background: var(--sun); color: var(--sun-ink); box-shadow: inset 0 0 0 1.5px #f3c95a; }
+  .pill-quoted { background: var(--mint); color: var(--mint-ink); }
+  .pill-booked { background: var(--ice); color: var(--blue-d); }
+  .sync { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
 
-  .chat-window {
-    background: #eef4f8; border-radius: 10px; padding: 12px; display: flex; flex-direction: column;
-    gap: 8px; min-height: 230px; max-height: 300px; overflow-y: auto; justify-content: flex-end;
+  /* lock screen */
+  .lock {
+    border-radius: 22px; padding: 22px 16px 16px; min-height: 380px; color: #fff;
+    background: radial-gradient(120% 90% at 20% 0%, #5d74ff 0%, rgba(93,116,255,0) 55%), linear-gradient(165deg, #2342f5 0%, #3a2fd0 55%, #14193a 100%);
   }
-  .chat-msg {
-    background: #fff; border-radius: 12px 12px 12px 3px; padding: 10px 12px; font-size: 12px;
-    line-height: 1.45; box-shadow: 0 1px 4px rgba(0,0,0,.05);
-  }
-  .chat-sender { font-size: 10.5px; font-weight: 700; color: var(--alert-color); margin-bottom: 3px; display: block; }
-  .chat-time { display: block; text-align: right; font-size: 10px; color: #8796a1; margin-top: 4px; }
-  .chat-actions { display: flex; gap: 6px; margin-top: 8px; }
-  .chat-actions button {
-    flex: 1; border: 1px solid var(--alert-color); background: #fff; color: var(--alert-color);
-    border-radius: 7px; padding: 5px 8px; font-size: 11px; font-weight: 600; cursor: pointer;
-  }
-  .chat-actions button:hover:not(:disabled) { background: var(--alert-color); color: #fff; }
-  .chat-actions button:disabled { opacity: .5; cursor: default; }
+  .clock { font-family: var(--display); font-weight: 500; font-size: 40px; letter-spacing: -0.04em; text-align: center; line-height: 1; }
+  .date { text-align: center; font-size: 13px; opacity: .85; margin: 6px 0 18px; }
+  .notifs { display: flex; flex-direction: column; gap: 9px; }
+  .notif { background: rgba(255,255,255,.92); color: var(--ink); border-radius: 18px; padding: 12px 14px; }
+  .notif.pop { animation: pop .35s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translateY(-14px) scale(.97); } to { opacity: 1; transform: none; } }
+  .n-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 5px; }
+  .n-icon { width: 20px; height: 20px; border-radius: 6px; display: grid; place-items: center; color: #fff; font-size: 11px; font-weight: 800; }
+  .n-time { margin-left: auto; font-weight: 500; }
+  .n-body { font-size: 13.5px; line-height: 1.45; }
+  .n-extra { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+  .n-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .n-actions button { flex: 1; border: 0; border-radius: 10px; padding: 7px 8px; font-weight: 700; font-size: 12.5px; cursor: pointer; background: var(--ice); color: var(--blue-d); transition: background .15s, color .15s; }
+  .n-actions button:hover:not(:disabled) { background: var(--blue); color: #fff; }
+  .n-actions button:disabled { background: var(--mint); color: var(--mint-ink); cursor: default; }
 
-  .flex-note { margin-top: 14px; padding: 10px 14px; background: var(--surface-muted); border-radius: 10px; font-size: 12px; color: var(--text-muted); }
-  .flex-note strong { color: var(--text-main); }
-
-  /* Flow */
-  .flow-section { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--border); }
-  .flow-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
-  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .step {
-    background: var(--surface-muted); border: 1.5px solid transparent; border-radius: 12px;
-    padding: 14px; cursor: pointer; transition: all .2s ease;
-  }
-  .step:hover, .step.active-step { background: #fff; border-color: var(--primary); }
-  .step-num { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: var(--primary); margin-bottom: 4px; }
-  .step-title { font-size: 13.5px; font-weight: 700; margin-bottom: 4px; }
-  .step-desc { font-size: 12px; color: var(--text-muted); }
-
-  .footer { margin-top: 18px; font-size: 11.5px; color: var(--text-muted); }
+  .flex-note { margin-top: 44px; padding: 16px 22px; border-radius: 20px; background: var(--ice); font-size: 14px; color: var(--muted); }
+  .flex-note strong { color: var(--ink); }
+  .footer { margin-top: 20px; font-size: 13px; color: var(--muted); max-width: 80ch; }
 
   .toast {
-    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--text-main);
-    color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 12.5px; opacity: 0; pointer-events: none;
-    transition: all .25s ease; z-index: 10; max-width: 90vw;
+    position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 24px); background: var(--ink); color: #fff; padding: 11px 20px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; max-width: 92vw;
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-  @media (max-width: 820px) {
-    .wrap { padding: 20px; }
-    .stage, .steps, .stack-picker { grid-template-columns: 1fr; }
-    h1 { font-size: 25px; }
+  /* ---------- Mobile: track moves to the left edge ---------- */
+  @media (max-width: 880px) {
+    .top { grid-template-columns: 1fr; }
+    .journey { grid-template-columns: 44px minmax(0, 1fr); row-gap: 14px; }
+    .rail { grid-column: 1; grid-row: 1 / span 6; }
+    .n1 { grid-column: 1; grid-row: 1; } .n2 { grid-column: 1; grid-row: 3; } .n3 { grid-column: 1; grid-row: 5; }
+    .t1 { grid-column: 2; grid-row: 1; } .c1 { grid-column: 2; grid-row: 2; }
+    .t2 { grid-column: 2; grid-row: 3; text-align: left; } .c2 { grid-column: 2; grid-row: 4; }
+    .t3 { grid-column: 2; grid-row: 5; } .c3 { grid-column: 2; grid-row: 6; }
+    .t2 .copy-desc { margin-left: 0; }
+    .copy { padding: 10px 12px; margin-top: 4px; }
+    .node { width: 38px; height: 38px; margin-top: 14px; font-size: 14px; }
+    .c1, .c2, .c3 { margin-bottom: 22px; }
+  }
+  @media (max-width: 480px) {
+    body { padding: 20px 12px 48px; }
+    .card { padding: 16px; border-radius: 22px; }
+    .two { grid-template-columns: 1fr; }
+    .journey { grid-template-columns: 34px minmax(0, 1fr); }
+    .node { width: 30px; height: 30px; font-size: 12px; margin-top: 12px; }
+    .tag { justify-self: start; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
 <body>
-<main class="wrap">
-  <div class="header">
+<div class="bubbles" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+
+<main class="page">
+  <header class="top">
     <div>
-      <span class="eyebrow">Practical Workflow · Customer Inquiries</span>
+      <p class="eyebrow">Practical Workflow · Customer Inquiries</p>
       <h1>Cleaning quote requests, organized from the start.</h1>
       <p class="intro">Instead of digging through scattered emails, each website inquiry is logged into a structured table and sent straight to the owner's phone. Try it: fill in the form, hit submit, and watch it flow.</p>
     </div>
-    <span class="industry-tag">Residential Cleaning🫧</span>
+    <span class="tag">✦ Residential Cleaning</span>
+  </header>
+
+  <div class="toolbar">
+    <p>Change any tool with the menu on its card, then submit a request.</p>
+    <button type="button" class="btn" id="resetBtn">↺ Reset demo</button>
   </div>
 
-  <section id="view-with">
-    <div class="toolbar">
-      <button type="button" class="btn-ghost" id="resetBtn">↺ Reset demo</button>
-      <span class="spacer"></span>
-      <button type="button" class="btn-ghost" id="stackToggle" aria-expanded="false">Swap tools ▾</button>
-    </div>
+  <section class="journey" id="journey">
+    <div class="rail" id="rail" aria-hidden="true"><span class="line" id="line"></span><span class="drop" id="drop"></span></div>
+    <div class="node n1" id="node-1" aria-hidden="true">1</div>
+    <div class="node n2" id="node-2" aria-hidden="true">2</div>
+    <div class="node n3" id="node-3" aria-hidden="true">3</div>
 
-    <div class="stack-picker hidden-view" id="stackPicker">
-      <div class="stack-group">
-        <div class="stack-title">Intake form</div>
-        <div class="chips" data-group="form">
-          <button type="button" class="chip on" data-key="jotform">Jotform</button>
-          <button type="button" class="chip" data-key="typeform">Typeform</button>
-          <button type="button" class="chip" data-key="gforms">Google Forms</button>
-        </div>
+    <!-- Station 1 -->
+    <article class="card c1 is-active" id="card-1">
+      <div class="card-head">
+        <label class="pick"><span class="dot" id="dot-form"></span>
+          <select id="sel-form" aria-label="Intake form tool"></select></label>
+        <span class="meta">Website Form</span>
       </div>
-      <div class="stack-group">
-        <div class="stack-title">Tracker</div>
-        <div class="chips" data-group="tracker">
-          <button type="button" class="chip on" data-key="airtable">Airtable</button>
-          <button type="button" class="chip" data-key="gsheets">Google Sheets</button>
-          <button type="button" class="chip" data-key="notion">Notion</button>
+      <div id="quoteForm">
+        <div class="field" id="f-name">
+          <label for="clientName">Client Name</label>
+          <input type="text" id="clientName" value="Maya Lin" autocomplete="off" />
+          <div class="err">Please enter a name.</div>
         </div>
-      </div>
-      <div class="stack-group">
-        <div class="stack-title">Owner alert</div>
-        <div class="chips" data-group="alert">
-          <button type="button" class="chip on" data-key="telegram">Telegram</button>
-          <button type="button" class="chip" data-key="whatsapp">WhatsApp</button>
-          <button type="button" class="chip" data-key="sms">SMS</button>
+        <div class="field" id="f-contact">
+          <label for="clientContact">Email or Phone</label>
+          <input type="text" id="clientContact" value="maya@example.com" autocomplete="off" />
+          <div class="err">Enter a valid email or phone number.</div>
         </div>
-      </div>
-    </div>
-
-    <div class="stage">
-      <article class="platform-card is-active" id="card-1">
-        <div class="app-bar">
-          <div class="app-brand"><span class="brand-dot" id="dot-form"></span><span id="name-form">Jotform</span></div>
-          <span class="app-meta">Website Form</span>
-        </div>
-        <div class="app-body">
-          <div id="quoteForm">
-            <div class="field" id="f-name">
-              <label for="clientName">Client Name</label>
-              <input type="text" id="clientName" value="Maya Lin" autocomplete="off" />
-              <div class="err">Please enter a name.</div>
-            </div>
-            <div class="field" id="f-contact">
-              <label for="clientContact">Email or Phone</label>
-              <input type="text" id="clientContact" value="maya@example.com" autocomplete="off" />
-              <div class="err">Enter a valid email or phone number.</div>
-            </div>
-            <div class="field">
-              <label for="homeSize">Home Size</label>
-              <select id="homeSize">
-                <option value="2 Bed / 2 Bath">2 Bed / 2 Bath</option>
-                <option value="3 Bed / 2.5 Bath" selected>3 Bed / 2.5 Bath</option>
-                <option value="4+ Bed House">4+ Bed House</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="serviceType">Service Type</label>
-              <select id="serviceType">
-                <option value="Standard Clean">Standard Clean</option>
-                <option value="Deep Clean" selected>Deep Clean</option>
-                <option value="Move-Out Clean">Move-Out Clean</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="prefDate">Preferred Date</label>
-              <input type="date" id="prefDate" />
-            </div>
-            <div class="field">
-              <label>Add-ons</label>
-              <div class="addons">
-                <label><input type="checkbox" value="Oven" /> Oven</label>
-                <label><input type="checkbox" value="Fridge" /> Fridge</label>
-                <label><input type="checkbox" value="Windows" /> Windows</label>
-              </div>
-            </div>
-            <button type="button" class="btn-submit" id="submitBtn">Submit Quote Request</button>
+        <div class="two">
+          <div class="field">
+            <label for="homeSize">Home Size</label>
+            <select id="homeSize">
+              <option value="2 Bed / 2 Bath">2 Bed / 2 Bath</option>
+              <option value="3 Bed / 2.5 Bath" selected>3 Bed / 2.5 Bath</option>
+              <option value="4+ Bed House">4+ Bed House</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="serviceType">Service Type</label>
+            <select id="serviceType">
+              <option value="Standard Clean">Standard Clean</option>
+              <option value="Deep Clean" selected>Deep Clean</option>
+              <option value="Move-Out Clean">Move-Out Clean</option>
+            </select>
           </div>
         </div>
-      </article>
+        <div class="field">
+          <label for="prefDate">Preferred Date</label>
+          <input type="date" id="prefDate" />
+        </div>
+        <div class="field">
+          <span class="lbl" id="addonsLbl">Add-ons</span>
+          <div class="addons" role="group" aria-labelledby="addonsLbl">
+            <label class="addon"><input type="checkbox" value="Oven" /><span>Oven</span></label>
+            <label class="addon"><input type="checkbox" value="Fridge" /><span>Fridge</span></label>
+            <label class="addon"><input type="checkbox" value="Windows" /><span>Windows</span></label>
+          </div>
+        </div>
+        <button type="button" class="submit" id="submitBtn">Submit Quote Request</button>
+      </div>
+    </article>
+    <button type="button" class="copy t1" data-step="1" aria-current="step">
+      <span class="kicker">Intake form</span>
+      <span class="copy-title">Customer submits quote form</span>
+      <span class="copy-desc">Captures home size, cleaning type, and contact details in one clean form (e.g., Jotform).</span>
+    </button>
 
-      <article class="platform-card" id="card-2">
-        <div class="app-bar">
-          <div class="app-brand"><span class="brand-dot" id="dot-tracker"></span><span id="name-tracker">Airtable</span></div>
-          <span class="app-meta" id="recordCount">2 Records</span>
-        </div>
-        <div class="app-body">
-          <table class="sheet-table">
-            <thead><tr><th>Client</th><th>Scope</th><th>Status</th></tr></thead>
-            <tbody id="trackerBody"></tbody>
-          </table>
-          <div class="sync-note" id="syncNote">Waiting for new form submission… Click a status to change it.</div>
-        </div>
-      </article>
+    <!-- Station 2 -->
+    <button type="button" class="copy t2" data-step="2">
+      <span class="kicker">Tracker database</span>
+      <span class="copy-title">Automation logs the record</span>
+      <span class="copy-desc">Creates a structured row in your tracker (e.g., Airtable or Google Sheets) with zero copy-pasting.</span>
+    </button>
+    <article class="card c2" id="card-2">
+      <div class="card-head">
+        <label class="pick"><span class="dot" id="dot-tracker"></span>
+          <select id="sel-tracker" aria-label="Tracker tool"></select></label>
+        <span class="meta" id="recordCount">2 Records</span>
+      </div>
+      <table class="sheet">
+        <thead><tr><th>Client</th><th>Scope</th><th>Status</th></tr></thead>
+        <tbody id="trackerBody"></tbody>
+      </table>
+      <p class="sync" id="syncNote">Waiting for new form submission… Click a status to change it.</p>
+    </article>
 
-      <article class="platform-card" id="card-3">
-        <div class="app-bar">
-          <div class="app-brand"><span class="brand-dot" id="dot-alert"></span><span id="name-alert">Telegram</span></div>
-          <span class="app-meta">Owner Alert</span>
-        </div>
-        <div class="app-body">
-          <div class="chat-window" id="chatWindow" aria-live="polite"></div>
-        </div>
-      </article>
-    </div>
-
-    <div class="flex-note">
-      <strong>Flexible tool stack:</strong> The applications shown are examples. Use <em>Swap tools</em> above to try other combinations. Any platforms of your choice can be connected for the exact same purpose.
-    </div>
+    <!-- Station 3 -->
+    <article class="card c3" id="card-3">
+      <div class="card-head">
+        <label class="pick"><span class="dot" id="dot-alert"></span>
+          <select id="sel-alert" aria-label="Owner alert tool"></select></label>
+        <span class="meta">Owner Alert</span>
+      </div>
+      <div class="lock">
+        <div class="clock" id="clock">9:41</div>
+        <div class="date" id="dateLine">Today</div>
+        <div class="notifs" id="notifs" aria-live="polite"></div>
+      </div>
+    </article>
+    <button type="button" class="copy t3" data-step="3">
+      <span class="kicker">Owner notification</span>
+      <span class="copy-title">Owner gets an instant alert</span>
+      <span class="copy-desc">Sends the summary straight to your preferred channel (e.g., Telegram, WhatsApp, or SMS).</span>
+    </button>
   </section>
 
-  <section class="flow-section">
-    <div class="flow-head">
-      <h2>How it works</h2>
-      <div class="toolbar" style="margin:0">
-        <button type="button" class="btn-ghost" id="prevStep">← Back</button>
-        <button type="button" class="btn-ghost" id="nextStep">Next →</button>
-      </div>
-    </div>
-    <div class="steps">
-      <div class="step active-step" id="step-1" data-step="1" role="button" tabindex="0">
-        <span class="step-num">01 · INTAKE FORM</span>
-        <div class="step-title">Customer submits quote form</div>
-        <div class="step-desc">Captures home size, cleaning type, and contact details in one clean form (e.g., Jotform).</div>
-      </div>
-      <div class="step" id="step-2" data-step="2" role="button" tabindex="0">
-        <span class="step-num">02 · TRACKER DATABASE</span>
-        <div class="step-title">Automation logs the record</div>
-        <div class="step-desc">Creates a structured row in your tracker (e.g., Airtable or Google Sheets) with zero copy-pasting.</div>
-      </div>
-      <div class="step" id="step-3" data-step="3" role="button" tabindex="0">
-        <span class="step-num">03 · OWNER NOTIFICATION</span>
-        <div class="step-title">Owner gets an instant alert</div>
-        <div class="step-desc">Sends the summary straight to your preferred channel (e.g., Telegram, WhatsApp, or SMS).</div>
-      </div>
-    </div>
-  </section>
-
-  <div class="footer">
-    Automation organizes the inquiry and notifies the owner; the business owner remains responsible for pricing and the customer response. Any platforms of your choice can be used for each step.
+  <div class="flex-note">
+    <strong>Flexible tool stack:</strong> The applications shown are examples. Use the menu on each card to try other combinations. Any platforms of your choice can be connected for the exact same purpose.
   </div>
+  <p class="footer">Automation organizes the inquiry and notifies the owner; the business owner remains responsible for pricing and the customer response. Any platforms of your choice can be used for each step.</p>
 </main>
 <div class="toast" id="toast" role="status"></div>
 
@@ -338,46 +354,31 @@
   "use strict";
 
   var STACK = {
-    form: {
-      jotform:  { name: "Jotform",      color: "#ff6100", label: "Jotform" },
-      typeform: { name: "Typeform",     color: "#262627", label: "Typeform" },
-      gforms:   { name: "Google Forms", color: "#7248b9", label: "Google Forms" }
-    },
-    tracker: {
-      airtable: { name: "Airtable",      color: "#18bfff" },
-      gsheets:  { name: "Google Sheets", color: "#188038" },
-      notion:   { name: "Notion",        color: "#000000" }
-    },
+    form:    { "Jotform": "#ff6100", "Typeform": "#262627", "Google Forms": "#7248b9" },
+    tracker: { "Airtable": "#18bfff", "Google Sheets": "#188038", "Notion": "#111111" },
     alert: {
-      telegram: { name: "Telegram", color: "#24a1de", sender: "Quote Tracker Bot", reply: true },
-      whatsapp: { name: "WhatsApp", color: "#25d366", sender: "Quote Tracker",     reply: true },
-      sms:      { name: "SMS",      color: "#5c6b62", sender: "Quote Alert",       reply: false }
+      "Telegram": { color: "#24a1de", sender: "Quote Tracker Bot", reply: true,  letter: "T" },
+      "WhatsApp": { color: "#25d366", sender: "Quote Tracker",     reply: true,  letter: "W" },
+      "SMS":      { color: "#5b6384", sender: "Quote Alert",       reply: false, letter: "S" }
     }
   };
-  var selected = { form: "jotform", tracker: "airtable", alert: "telegram" };
-
   var SAMPLES = [
     { name: "Jordan Taylor", contact: "jordan.t@example.com", size: "2 Bed / 2 Bath",   service: "Standard Clean" },
     { name: "Samira Patel",  contact: "587-555-0142",         size: "4+ Bed House",     service: "Move-Out Clean" },
     { name: "Liam O'Connor", contact: "liam@example.com",     size: "3 Bed / 2.5 Bath", service: "Deep Clean" },
     { name: "Chloe Bennett", contact: "403-555-0199",         size: "2 Bed / 2 Bath",   service: "Deep Clean" }
   ];
-  var sampleIdx = 0;
-  var MAX_ROWS = 5;
   var STATUSES = ["New", "Quoted", "Booked"];
+  var MAX_ROWS = 5;
 
-  var nextId = 1;
-  var records = [];
-  var messages = [];
-  var timers = [];
-  var busy = false;
-  var currentStep = 1;
-  var toastTimer = null;
+  var sel = { form: "Jotform", tracker: "Airtable", alert: "Telegram" };
+  var records = [], messages = [], nextId = 1, sampleIdx = 0;
+  var timers = [], busy = false, step = 1, dropStation = 1, toastTimer = null;
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
-  function timeNow() { return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
-  function later(fn, ms) { var t = setTimeout(fn, ms); timers.push(t); return t; }
+  function timeNow() { return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
   function clearTimers() { timers.forEach(clearTimeout); timers = []; }
 
   function toast(msg) {
@@ -388,8 +389,7 @@
     toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2200);
   }
 
-  /* ---------- Initial data ---------- */
-  function seedData() {
+  function seed() {
     nextId = 1;
     records = [
       { id: nextId++, name: "David K.", scope: "4+ Bed · Move-Out", status: "Quoted", fresh: false },
@@ -402,56 +402,75 @@
 
   /* ---------- Rendering ---------- */
   function renderTracker() {
-    var body = $("trackerBody");
-    body.innerHTML = records.map(function (r) {
-      var cls = "pill-" + r.status.toLowerCase();
-      return '<tr class="sheet-row' + (r.fresh ? " highlight" : "") + '">' +
-        "<td><strong>" + esc(r.name) + "</strong></td>" +
-        "<td>" + esc(r.scope) + "</td>" +
-        '<td><button type="button" class="pill ' + cls + '" data-id="' + r.id + '" title="Click to change status">' + r.status + "</button></td></tr>";
+    $("trackerBody").innerHTML = records.map(function (r) {
+      return '<tr class="' + (r.fresh ? "fresh" : "") + '"><td><strong>' + esc(r.name) + "</strong></td><td>" + esc(r.scope) + "</td>" +
+        '<td><button type="button" class="pill pill-' + r.status.toLowerCase() + '" data-id="' + r.id + '" title="Click to change status">' + r.status + "</button></td></tr>";
     }).join("");
     $("recordCount").textContent = records.length + (records.length === 1 ? " Record" : " Records");
   }
 
-  function renderChat() {
-    var cfg = STACK.alert[selected.alert];
-    var win = $("chatWindow");
-    var shown = messages.slice(-3);
-    win.innerHTML = shown.map(function (m) {
+  function renderAlert() {
+    var cfg = STACK.alert[sel.alert];
+    var now = new Date();
+    $("clock").textContent = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }).replace(/\s?[AP]M/i, "");
+    $("dateLine").textContent = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+    $("notifs").innerHTML = messages.slice(-3).reverse().map(function (m, i) {
       var extra = [];
       if (m.addons && m.addons.length) extra.push("Add-ons: " + m.addons.join(", "));
       if (m.date) extra.push("Preferred: " + m.date);
       if (m.contact) extra.push("Contact: " + m.contact);
       var actions = "";
       if (cfg.reply) {
-        actions = '<div class="chat-actions">' +
-          '<button type="button" data-act="quoted" data-id="' + m.id + '"' + (m.done ? " disabled" : "") + ">" + (m.done ? "Quoted ✓" : "Mark quoted") + "</button>" +
-          '<button type="button" data-act="call" data-id="' + m.id + '">Call back</button></div>';
+        actions = '<div class="n-actions"><button type="button" data-act="quoted" data-id="' + m.id + '"' + (m.done ? " disabled" : "") + ">" +
+          (m.done ? "Quoted ✓" : "Mark quoted") + '</button><button type="button" data-act="call" data-id="' + m.id + '">Call back</button></div>';
       }
-      return '<div class="chat-msg"><span class="chat-sender">' + esc(cfg.sender) + "</span>" +
-        "New inquiry logged: <strong>" + esc(m.name) + "</strong> requested a <strong>" + esc(m.service) + "</strong> (" + esc(m.size) + ")." +
-        (extra.length ? "<br><span style='color:#5c6b62'>" + esc(extra.join(" · ")) + "</span>" : "") +
-        (m.time === "10:14 AM" && m.done && !m.contact ? "" : " Ready for your quote.") +
-        actions + '<span class="chat-time">' + esc(m.time) + "</span></div>";
+      return '<div class="notif' + (m.fresh && i === 0 ? " pop" : "") + '"><div class="n-head"><span class="n-icon" style="background:' + cfg.color + '">' + cfg.letter +
+        "</span><span>" + esc(cfg.sender) + '</span><span class="n-time">' + esc(m.time) + "</span></div>" +
+        '<div class="n-body">New inquiry logged: <strong>' + esc(m.name) + "</strong> requested a <strong>" + esc(m.service) + "</strong> (" + esc(m.size) + "). Ready for your quote." +
+        (extra.length ? '<span class="n-extra">' + esc(extra.join(" · ")) + "</span>" : "") + "</div>" + actions + "</div>";
     }).join("");
-    win.scrollTop = win.scrollHeight;
+    messages.forEach(function (m) { m.fresh = false; });
   }
 
   function renderBrands() {
-    var f = STACK.form[selected.form], t = STACK.tracker[selected.tracker], a = STACK.alert[selected.alert];
-    $("name-form").textContent = f.name;    $("dot-form").style.background = f.color;
-    $("name-tracker").textContent = t.name; $("dot-tracker").style.background = t.color;
-    $("name-alert").textContent = a.name;   $("dot-alert").style.background = a.color;
-    document.documentElement.style.setProperty("--alert-color", a.color);
-    renderChat();
+    $("dot-form").style.background = STACK.form[sel.form];
+    $("dot-tracker").style.background = STACK.tracker[sel.tracker];
+    $("dot-alert").style.background = STACK.alert[sel.alert].color;
+    renderAlert();
   }
 
-  /* ---------- Steps ---------- */
-  function focusStep(num) {
-    currentStep = num;
-    [1, 2, 3].forEach(function (n) {
-      $("step-" + n).classList.toggle("active-step", n === num);
-      $("card-" + n).classList.toggle("is-active", n === num);
+  /* ---------- Track and droplet ---------- */
+  function nodeCenter(n) {
+    var r = $("node-" + n).getBoundingClientRect(), rr = $("rail").getBoundingClientRect();
+    return r.top - rr.top + r.height / 2;
+  }
+  function layoutRail() {
+    var a = nodeCenter(1), c = nodeCenter(3);
+    $("line").style.top = a + "px";
+    $("line").style.height = Math.max(c - a, 0) + "px";
+    dropAt(dropStation, false);
+  }
+  function dropAt(n, animate) {
+    var d = $("drop");
+    d.style.transition = animate ? "top .55s cubic-bezier(.5, 0, .2, 1)" : "none";
+    d.style.top = nodeCenter(n) + "px";
+    dropStation = n;
+  }
+  function ping(n) {
+    var el = $("node-" + n);
+    el.classList.remove("ping");
+    void el.offsetWidth;
+    el.classList.add("ping");
+    later(function () { el.classList.remove("ping"); }, 800);
+  }
+  function focusStep(n) {
+    step = n;
+    [1, 2, 3].forEach(function (i) {
+      $("node-" + i).classList.toggle("active", i === n);
+      $("card-" + i).classList.toggle("is-active", i === n);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".copy"), function (el) {
+      if (Number(el.getAttribute("data-step")) === n) el.setAttribute("aria-current", "step"); else el.removeAttribute("aria-current");
     });
   }
 
@@ -460,8 +479,7 @@
     var name = $("clientName").value.trim();
     var contact = $("clientContact").value.trim();
     var okName = name.length > 0;
-    var digits = contact.replace(/\D/g, "");
-    var okContact = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) || digits.length >= 7;
+    var okContact = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) || contact.replace(/\D/g, "").length >= 7;
     $("f-name").classList.toggle("invalid", !okName);
     $("f-contact").classList.toggle("invalid", !okContact);
     if (!okName) { $("clientName").focus(); toast("Please enter a client name."); return false; }
@@ -469,14 +487,9 @@
     return true;
   }
 
-  function runWorkflow(opts) {
-    opts = opts || {};
-    if (busy) return;
-    if (!opts.skipValidation && !validate()) return;
-    $("f-name").classList.remove("invalid");
-    $("f-contact").classList.remove("invalid");
-
-    var name = $("clientName").value.trim() || "New Homeowner";
+  function runWorkflow() {
+    if (busy || !validate()) return;
+    var name = $("clientName").value.trim();
     var contact = $("clientContact").value.trim();
     var size = $("homeSize").value;
     var service = $("serviceType").value;
@@ -486,36 +499,33 @@
     busy = true;
     $("submitBtn").disabled = true;
     focusStep(1);
+    dropAt(1, true);
+    ping(1);
 
-    var rec = {
-      id: nextId++, name: name,
-      scope: size.split(" ")[0] + " " + size.split(" ")[1] + " · " + service.split(" ")[0],
-      status: "New", fresh: true
-    };
+    var rec = { id: nextId++, name: name, scope: size.split(" ")[0] + " " + size.split(" ")[1] + " · " + service.split(" ")[0], status: "New", fresh: true };
 
+    later(function () { dropAt(2, true); }, 350);
     later(function () {
-      focusStep(2);
+      focusStep(2); ping(2);
       records.forEach(function (r) { r.fresh = false; });
       records.unshift(rec);
       if (records.length > MAX_ROWS) records.pop();
       renderTracker();
       $("syncNote").textContent = "Row added for " + name + " just now.";
-    }, 250);
-
+    }, 950);
+    later(function () { dropAt(3, true); }, 1350);
     later(function () {
-      focusStep(3);
-      messages.push({ id: rec.id, name: name, service: service, size: size, contact: contact, addons: addons, date: date, time: timeNow(), done: false });
+      focusStep(3); ping(3);
+      messages.push({ id: rec.id, name: name, service: service, size: size, contact: contact, addons: addons, date: date, time: timeNow(), done: false, fresh: true });
       if (messages.length > 20) messages.shift();
-      renderChat();
-    }, 550);
-
+      renderAlert();
+    }, 1950);
     later(function () {
       busy = false;
       $("submitBtn").disabled = false;
-      if (!opts.silent) toast("Done: " + name + " is logged and the owner was alerted.");
-    }, 800);
+      toast("Done: " + name + " is logged and the owner was alerted.");
+    }, 2200);
 
-    // Load the next sample so the demo can be repeated
     var s = SAMPLES[sampleIdx % SAMPLES.length];
     sampleIdx++;
     $("clientName").value = s.name;
@@ -525,11 +535,17 @@
     Array.prototype.forEach.call(document.querySelectorAll(".addons input"), function (c) { c.checked = false; });
   }
 
+  function setDefaultDate() {
+    var d = new Date();
+    d.setDate(d.getDate() + 7);
+    $("prefDate").value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
   function resetDemo() {
     clearTimers();
     busy = false;
     $("submitBtn").disabled = false;
-    seedData();
+    seed();
     sampleIdx = 0;
     $("clientName").value = "Maya Lin";
     $("clientContact").value = "maya@example.com";
@@ -541,43 +557,35 @@
     $("f-contact").classList.remove("invalid");
     $("syncNote").textContent = "Waiting for new form submission… Click a status to change it.";
     renderTracker();
-    renderChat();
+    renderAlert();
     focusStep(1);
+    dropAt(1, true);
     toast("Demo reset.");
   }
 
-  function setDefaultDate() {
-    var d = new Date();
-    d.setDate(d.getDate() + 7);
-    var m = String(d.getMonth() + 1).padStart(2, "0");
-    var day = String(d.getDate()).padStart(2, "0");
-    $("prefDate").value = d.getFullYear() + "-" + m + "-" + day;
-  }
+  /* ---------- Wiring ---------- */
+  Object.keys(STACK).forEach(function (group) {
+    var s = $("sel-" + group);
+    s.innerHTML = Object.keys(STACK[group]).map(function (k) { return '<option value="' + esc(k) + '">' + esc(k) + "</option>"; }).join("");
+    s.value = sel[group];
+    s.addEventListener("change", function () {
+      sel[group] = s.value;
+      renderBrands();
+      toast("Now using " + s.value + ".");
+    });
+  });
 
-  /* ---------- Events ---------- */
-  $("submitBtn").addEventListener("click", function () { runWorkflow(); });
+  $("submitBtn").addEventListener("click", runWorkflow);
   ["clientName", "clientContact"].forEach(function (id) {
     $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); runWorkflow(); } });
   });
-
   $("resetBtn").addEventListener("click", resetDemo);
 
-  $("stackToggle").addEventListener("click", function () {
-    var p = $("stackPicker");
-    var open = p.classList.toggle("hidden-view") === false;
-    $("stackToggle").setAttribute("aria-expanded", String(open));
-    $("stackToggle").textContent = open ? "Swap tools ▴" : "Swap tools ▾";
-  });
-
-  Array.prototype.forEach.call(document.querySelectorAll(".chips"), function (group) {
-    group.addEventListener("click", function (e) {
-      var chip = e.target.closest(".chip");
-      if (!chip) return;
-      var g = group.getAttribute("data-group");
-      selected[g] = chip.getAttribute("data-key");
-      Array.prototype.forEach.call(group.querySelectorAll(".chip"), function (c) { c.classList.toggle("on", c === chip); });
-      renderBrands();
-      toast("Now using " + chip.textContent + ".");
+  Array.prototype.forEach.call(document.querySelectorAll(".copy"), function (el) {
+    el.addEventListener("click", function () {
+      var n = Number(el.getAttribute("data-step"));
+      focusStep(n);
+      dropAt(n, true);
     });
   });
 
@@ -591,21 +599,20 @@
     rec.fresh = false;
     messages.forEach(function (m) { if (m.id === id) m.done = rec.status !== "New"; });
     renderTracker();
-    renderChat();
+    renderAlert();
     $("syncNote").textContent = rec.name + " marked as " + rec.status + ".";
   });
 
-  $("chatWindow").addEventListener("click", function (e) {
+  $("notifs").addEventListener("click", function (e) {
     var btn = e.target.closest("button[data-act]");
     if (!btn || btn.disabled) return;
     var id = Number(btn.getAttribute("data-id"));
-    var act = btn.getAttribute("data-act");
-    if (act === "quoted") {
+    if (btn.getAttribute("data-act") === "quoted") {
       records.forEach(function (r) { if (r.id === id && r.status === "New") { r.status = "Quoted"; r.fresh = false; } });
       messages.forEach(function (m) { if (m.id === id) m.done = true; });
       renderTracker();
-      renderChat();
-      focusStep(2);
+      renderAlert();
+      focusStep(2); dropAt(2, true); ping(2);
       $("syncNote").textContent = "Status synced back from the alert.";
       toast("Marked as quoted. The tracker updated.");
     } else {
@@ -614,22 +621,17 @@
     }
   });
 
-  Array.prototype.forEach.call(document.querySelectorAll(".step"), function (el) {
-    function go() { focusStep(parseInt(el.getAttribute("data-step"), 10)); }
-    el.addEventListener("click", go);
-    el.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); }
-    });
-  });
-  $("prevStep").addEventListener("click", function () { focusStep(currentStep === 1 ? 3 : currentStep - 1); });
-  $("nextStep").addEventListener("click", function () { focusStep(currentStep === 3 ? 1 : currentStep + 1); });
+  window.addEventListener("resize", layoutRail);
+  if (window.ResizeObserver) new ResizeObserver(layoutRail).observe($("journey"));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutRail);
 
   /* ---------- Init ---------- */
-  seedData();
+  seed();
   setDefaultDate();
   renderTracker();
   renderBrands();
   focusStep(1);
+  layoutRail();
 })();
 </script>
 </body>
