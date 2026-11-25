@@ -1,728 +1,635 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dog Grooming Appointment Reminders Workflow</title>
-    <style>
-      :root {
-        --bg: #f6f8f5;
-        --surface: #ffffff;
-        --surface-soft: #eef3ec;
-        --primary: #2d5a43;
-        --primary-light: #437d5f;
-        --accent: #e09f3e;
-        --accent-soft: #fdf5e6;
-        --danger-soft: #fdf0ed;
-        --danger-text: #b84a39;
-        --text-main: #232d27;
-        --text-muted: #5c6b62;
-        --border: #dce4dc;
-        --radius: 16px;
-        --shadow: 0 10px 28px rgba(35, 45, 39, 0.06);
-      }
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dog Grooming Appointment Reminders Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --tile: #f3fafa;
+    --grout: #c4e4e6;
+    --ink: #0f2d3a;
+    --ink-soft: #3d5966;
+    --towel: #ffcf3f;
+    --towel-soft: #fff2c2;
+    --water: #2a9d9f;
+    --water-soft: #d8f1f0;
+    --rose: #ef476f;
+    --rose-soft: #ffe3ea;
+    --white: #ffffff;
+    --ok: #d4f0df;
+    --ok-ink: #17603c;
+    --display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--body);
+    line-height: 1.5;
+    background-color: var(--tile);
+    /* bathroom tile wall */
+    background-image:
+      linear-gradient(var(--grout) 2px, transparent 2px),
+      linear-gradient(90deg, var(--grout) 2px, transparent 2px);
+    background-size: 64px 64px;
+    padding: 28px 16px 48px;
+  }
+  button { font-family: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--water); outline-offset: 2px; }
 
-      * {
-        box-sizing: border-box;
-      }
+  .page { max-width: 1100px; margin: 0 auto; }
 
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text-main);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        line-height: 1.5;
-        padding: 20px;
-      }
+  /* ---------- Header ---------- */
+  .masthead {
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: 26px;
+    box-shadow: 6px 6px 0 var(--ink);
+    padding: 30px 32px 28px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px 28px;
+    align-items: start;
+  }
+  .eyebrow { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--water); }
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(30px, 4.6vw, 50px);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    margin: 0 0 12px;
+    max-width: 20ch;
+  }
+  .intro { margin: 0; max-width: 56ch; color: var(--ink-soft); font-size: 16px; }
+  .tag {
+    justify-self: end;
+    background: var(--towel);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-weight: 700;
+    font-size: 14px;
+    white-space: nowrap;
+    transform: rotate(2deg);
+  }
 
-      .wrap {
-        max-width: 960px;
-        margin: 0 auto;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 22px;
-        padding: 32px;
-        box-shadow: var(--shadow);
-      }
+  /* ---------- Switch ---------- */
+  .switchbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 26px 2px 18px; }
+  .switchbar > span { font-weight: 700; font-size: 15px; }
+  .switch { display: inline-flex; background: var(--white); border: 2px solid var(--ink); border-radius: 999px; padding: 4px; gap: 4px; }
+  .switch button {
+    border: 0; background: transparent; border-radius: 999px; padding: 9px 18px;
+    font-weight: 700; font-size: 14px; cursor: pointer; transition: background .15s, color .15s;
+  }
+  .switch button:hover { background: var(--water-soft); }
+  .switch button[aria-pressed="true"] { background: var(--ink); color: var(--white); }
+  .switch button[aria-pressed="true"]#btn-before { background: var(--rose); color: var(--white); }
 
-      /* Header */
-      .top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 24px;
-      }
+  .panel-view[hidden] { display: none; }
 
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        color: var(--primary);
-        background: var(--surface-soft);
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
+  /* ---------- Pipeline ---------- */
+  .tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tools p { margin: 0; font-size: 14px; color: var(--ink-soft); }
+  .btn {
+    border: 2px solid var(--ink); background: var(--white); border-radius: 12px; padding: 8px 14px;
+    font-weight: 700; font-size: 13.5px; cursor: pointer; box-shadow: 3px 3px 0 var(--ink);
+    transition: transform .08s, box-shadow .08s, background .15s;
+  }
+  .btn:hover { background: var(--towel-soft); }
+  .btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
 
-      h1 {
-        font-family: Georgia, "Times New Roman", serif;
-        font-size: 32px;
-        font-weight: 400;
-        line-height: 1.18;
-        margin: 12px 0 8px;
-        color: var(--text-main);
-      }
+  .pipeline { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .78fr) minmax(0, 1fr); gap: 22px; align-items: start; }
 
-      .intro {
-        max-width: 600px;
-        color: var(--text-muted);
-        font-size: 15px;
-        margin: 0;
-      }
+  .card {
+    background: var(--white); border: 2px solid var(--ink); border-radius: 22px; box-shadow: 6px 6px 0 var(--ink);
+    padding: 20px;
+  }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .card-head h2 { font-family: var(--display); font-size: 18px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+  .auto { font-size: 12.5px; font-weight: 600; color: var(--ok-ink); background: var(--ok); border-radius: 999px; padding: 3px 10px; }
 
-      .tag {
-        border: 1px solid var(--border);
-        background: #fafcfa;
-        border-radius: 30px;
-        padding: 8px 14px;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--primary);
-        white-space: nowrap;
-      }
+  /* app swapper */
+  .menu-wrap { position: relative; display: inline-block; margin-bottom: 14px; }
+  .app-btn {
+    display: inline-flex; align-items: center; gap: 8px; border: 2px solid var(--ink); background: var(--tile);
+    border-radius: 999px; padding: 5px 12px 5px 8px; font-weight: 700; font-size: 13px; cursor: pointer;
+  }
+  .app-btn:hover { background: var(--towel-soft); }
+  .app-btn .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--water); border: 2px solid var(--ink); }
+  .app-btn .hint { font-weight: 500; color: var(--ink-soft); }
+  .menu {
+    position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; min-width: 220px; background: var(--white);
+    border: 2px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink); padding: 6px;
+  }
+  .menu[hidden] { display: none; }
+  .menu button {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; background: transparent;
+    padding: 9px 10px; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .menu button:hover, .menu button:focus-visible { background: var(--water-soft); }
+  .menu button[aria-checked="true"]::after { content: "✓"; margin-left: auto; color: var(--water); font-weight: 800; }
+  .menu .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--ink); flex: none; }
 
-      /* Interactive Mode Switcher */
-      .toggle-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: var(--surface-soft);
-        padding: 8px 12px;
-        border-radius: 14px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
+  /* day agenda */
+  .timeline { display: flex; flex-direction: column; gap: 12px; margin-top: 2px; }
+  .slot { display: grid; grid-template-columns: 62px minmax(0, 1fr); align-items: center; gap: 8px; }
+  .slot-time { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); }
+  .blk {
+    position: relative; width: 100%; min-height: 72px; text-align: left; cursor: pointer;
+    display: flex; align-items: center; gap: 10px; padding: 10px 96px 10px 10px;
+    background: var(--tile); border: 2px solid var(--grout); border-radius: 14px;
+    transition: border-color .15s, background .15s, transform .12s;
+  }
+  .blk:hover { border-color: var(--water); }
+  .blk[aria-pressed="true"] { border-color: var(--ink); background: var(--towel-soft); transform: translateX(3px); box-shadow: -4px 4px 0 var(--ink); }
+  .avatar { flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--white); border: 2px solid var(--ink); display: grid; place-items: center; font-size: 18px; }
+  .pet-name { display: block; font-weight: 700; font-size: 13.5px; line-height: 1.25; }
+  .pet-meta { display: block; font-size: 11.5px; color: var(--ink-soft); line-height: 1.3; }
+  .status { position: absolute; top: 8px; right: 8px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; border: 1.5px solid var(--ink); }
+  .status.due { background: var(--towel); }
+  .status.sent { background: var(--ok); color: var(--ok-ink); border-color: var(--ok-ink); }
 
-      .toggle-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text-main);
-        padding-left: 6px;
-      }
+  .send {
+    width: 100%; margin-top: 16px; padding: 13px; border: 2px solid var(--ink); border-radius: 14px; background: var(--towel);
+    font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 4px 4px 0 var(--ink); transition: transform .08s, box-shadow .08s;
+  }
+  .send:hover { background: #ffd95e; }
+  .send:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--ink); }
 
-      .toggle-btns {
-        display: flex;
-        gap: 6px;
-        background: #dfe7de;
-        padding: 4px;
-        border-radius: 10px;
-      }
+  /* step rail */
+  .rail { position: relative; display: flex; flex-direction: column; gap: 16px; padding-top: 6px; }
+  .rail::before { content: ""; position: absolute; left: 21px; top: 28px; bottom: 28px; width: 4px; background: repeating-linear-gradient(var(--ink) 0 6px, transparent 6px 12px); opacity: .35; }
+  .step {
+    position: relative; display: grid; grid-template-columns: 44px 1fr; gap: 12px; text-align: left; width: 100%;
+    background: var(--white); border: 2px solid var(--ink); border-radius: 18px; padding: 12px 14px 12px 8px; cursor: pointer;
+    transition: background .2s, transform .15s, box-shadow .15s;
+  }
+  .step:hover { background: var(--water-soft); }
+  .step[aria-current="step"] { background: var(--towel); box-shadow: 4px 4px 0 var(--ink); transform: translateX(4px); }
+  .node { width: 36px; height: 36px; margin: 2px 0 0 4px; border-radius: 50%; background: var(--ink); color: var(--white); display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 16px; }
+  .step[aria-current="step"] .node { background: var(--white); color: var(--ink); border: 2px solid var(--ink); }
+  .step-kind { display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; color: var(--water); }
+  .step[aria-current="step"] .step-kind { color: var(--ink); }
+  .step-title { display: block; font-family: var(--display); font-weight: 700; font-size: 15.5px; line-height: 1.2; margin: 2px 0 4px; }
+  .step-desc { display: block; font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
+  .step[aria-current="step"] .step-desc { color: var(--ink); }
 
-      .toggle-btn {
-        border: none;
-        background: transparent;
-        padding: 7px 14px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--text-muted);
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
+  /* phone */
+  .phone-col { display: flex; flex-direction: column; align-items: center; }
+  .phone-title { align-self: stretch; }
+  .phone { width: 100%; max-width: 300px; background: var(--ink); border-radius: 38px; padding: 10px; position: relative; }
+  .phone::before { content: ""; position: absolute; top: 18px; left: 50%; width: 70px; height: 7px; margin-left: -35px; background: #000; border-radius: 6px; z-index: 2; opacity: .6; }
+  .screen { background: var(--white); border-radius: 29px; overflow: hidden; }
+  .screen-head { padding: 26px 14px 10px; border-bottom: 1.5px solid var(--grout); background: var(--tile); }
+  .salon { font-weight: 800; font-size: 14px; font-family: var(--display); }
+  .channel-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; gap: 6px; }
+  .channel-row .menu-wrap { margin: 0; }
+  .channel-row .app-btn { padding: 3px 10px 3px 6px; font-size: 12px; }
+  .to { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); }
+  .thread { min-height: 270px; padding: 14px 12px; display: flex; flex-direction: column; gap: 10px; background: var(--white); }
+  .bubble { max-width: 88%; padding: 10px 12px; font-size: 13px; line-height: 1.45; border-radius: 18px 18px 18px 5px; background: #e8eef0; position: relative; }
+  .bubble.draft { background: transparent; border: 2px dashed var(--ink-soft); }
+  .bubble.reply { align-self: flex-end; border-radius: 18px 18px 5px 18px; background: var(--water); color: var(--white); }
+  .draft-tag { display: block; font-size: 11px; font-weight: 700; color: var(--ink-soft); margin-bottom: 4px; }
+  .pop { animation: pop .3s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
 
-      .toggle-btn.active {
-        background: var(--surface);
-        color: var(--primary);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      }
+  .phone[data-channel="WhatsApp"] .thread { background: #ece3d3; }
+  .phone[data-channel="WhatsApp"] .bubble { background: var(--white); border-radius: 12px 12px 12px 3px; }
+  .phone[data-channel="WhatsApp"] .bubble.draft { background: rgba(255,255,255,.5); }
+  .phone[data-channel="WhatsApp"] .bubble.reply { background: #d7f7c8; color: var(--ink); border-radius: 12px 12px 3px 12px; }
+  .phone[data-channel="Email"] .thread { background: #f6f8f9; }
+  .phone[data-channel="Email"] .bubble { max-width: 100%; border-radius: 10px; background: var(--white); border: 1.5px solid var(--grout); }
+  .phone[data-channel="Email"] .bubble.draft { border: 2px dashed var(--ink-soft); background: transparent; }
+  .phone[data-channel="Email"] .bubble.reply { align-self: stretch; background: var(--water-soft); color: var(--ink); border: 1.5px solid var(--water); }
+  .subject { display: block; font-weight: 800; font-size: 13px; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid var(--grout); }
 
-      /* Views */
-      .view-panel {
-        display: none;
-        animation: fadeIn 0.3s ease;
-      }
+  .delivery { display: flex; justify-content: space-between; gap: 8px; margin: 12px 4px 0; width: 100%; max-width: 300px; font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+  #deliveryStatus { color: var(--ink); }
+  .try { width: 100%; max-width: 300px; margin-top: 16px; }
+  .try p { margin: 0 0 6px; font-size: 12.5px; font-weight: 700; }
+  .replies { display: flex; gap: 8px; }
+  .replies .btn { flex: 1; font-size: 12.5px; padding: 8px 6px; line-height: 1.25; }
 
-      .view-panel.active {
-        display: block;
-      }
+  .flex-note { margin-top: 24px; background: var(--white); border: 2px solid var(--ink); border-radius: 16px; padding: 12px 16px; font-size: 13.5px; color: var(--ink-soft); }
+  .flex-note strong { color: var(--ink); }
 
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(4px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
+  /* manual chasing board */
+  .board { background: #d9b88f; border: 2px solid var(--ink); border-radius: 22px; box-shadow: 6px 6px 0 var(--ink); padding: 36px 28px 40px;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px;
+    background-image: radial-gradient(rgba(0,0,0,.08) 1.2px, transparent 1.4px); background-size: 14px 14px; }
+  .note { position: relative; padding: 26px 18px 20px; font-size: 14.5px; color: #3a2a1c; box-shadow: 3px 5px 0 rgba(0,0,0,.28); }
+  .note::before { content: ""; position: absolute; top: -12px; left: 50%; width: 70px; height: 22px; margin-left: -35px; background: rgba(255,255,255,.55); border: 1px solid rgba(0,0,0,.12); transform: rotate(-3deg); }
+  .note strong { display: block; font-family: var(--display); font-size: 16px; margin-bottom: 6px; color: #7a1d36; }
+  .note:nth-child(1) { background: #fff3a8; transform: rotate(-2.2deg); }
+  .note:nth-child(2) { background: #ffd0dc; transform: rotate(1.6deg) translateY(10px); }
+  .note:nth-child(3) { background: #cfeefa; transform: rotate(-1deg); }
 
-      .chaos-box {
-        background: var(--danger-soft);
-        border: 1px dashed #e5b3a8;
-        border-radius: var(--radius);
-        padding: 20px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 12px;
-      }
+  .foot { margin-top: 30px; padding: 16px 4px 0; border-top: 2px solid var(--ink); display: flex; justify-content: space-between; gap: 10px 20px; flex-wrap: wrap; font-size: 13px; color: var(--ink-soft); }
+  .foot strong { color: var(--ink); }
 
-      .messy-note {
-        background: #fff;
-        padding: 12px 14px;
-        border-radius: 10px;
-        border-left: 3px solid var(--danger-text);
-        font-size: 12.5px;
-        color: #4a3531;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-      }
+  .toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 24px); background: var(--ink); color: var(--white); padding: 10px 18px; border-radius: 999px; font-size: 13.5px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; max-width: 92vw; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-      .messy-note strong {
-        display: block;
-        font-size: 11px;
-        text-transform: uppercase;
-        color: var(--danger-text);
-        margin-bottom: 4px;
-      }
+  @media (max-width: 980px) {
+    .pipeline { grid-template-columns: 1fr; }
+    .rail::before { display: none; }
+    .step[aria-current="step"] { transform: none; }
+    .board { grid-template-columns: 1fr; }
+    .note:nth-child(2) { transform: rotate(1.6deg); }
+  }
+  @media (max-width: 560px) {
+    body { padding: 16px 12px 40px; background-size: 48px 48px; }
+    .masthead { padding: 22px 18px; grid-template-columns: 1fr; box-shadow: 4px 4px 0 var(--ink); }
+    .tag { justify-self: start; transform: none; }
+    .card { padding: 16px; box-shadow: 4px 4px 0 var(--ink); }
+    .blk { padding-right: 10px; padding-top: 34px; }
+    .slot { grid-template-columns: 1fr; gap: 4px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
 
-      /* Simulator Grid */
-      .demo-grid {
-        display: grid;
-        grid-template-columns: 1.05fr 1.15fr;
-        gap: 18px;
-        align-items: stretch;
-      }
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">🐾 Practical Workflow · Appointments</p>
+      <h1>Grooming reminders, without the daily chasing.</h1>
+      <p class="intro">A busy dog grooming salon has enough to manage between baths and trims. Once a booking hits the calendar, customer reminders go out automatically.</p>
+    </div>
+    <span class="tag">✂️ Independent Dog Grooming 🐾</span>
+  </header>
 
-      .sim-card {
-        background: #fafcfa;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
+  <div class="switchbar">
+    <span>Compare the salon routine:</span>
+    <div class="switch" role="group" aria-label="Compare the salon routine">
+      <button type="button" id="btn-after" aria-pressed="true">✅ Automated Reminders (Try It)</button>
+      <button type="button" id="btn-before" aria-pressed="false">😫 Manual Chasing</button>
+    </div>
+  </div>
 
-      .sim-title {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
+  <!-- BEFORE -->
+  <section class="panel-view" id="view-before" hidden>
+    <div class="board">
+      <div class="note"><strong>🛁 1:15 PM · Mid-Bath</strong>Hands covered in shampoo while trying to remember who booked tomorrow's 9:00 AM full groom.</div>
+      <div class="note"><strong>📵 4:30 PM · Rush Hour</strong>Forgot to text Bella's owner—they thought the appointment was next Thursday. Empty table for 2 hours.</div>
+      <div class="note"><strong>📋 6:45 PM · Closing Time</strong>Manually scrolling tomorrow's calendar and typing out repetitive reminder texts one by one.</div>
+    </div>
+  </section>
 
-      /* Salon Booking List */
-      .booking-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
+  <!-- AFTER -->
+  <section class="panel-view" id="view-after">
+    <div class="tools">
+      <p>Tap an app name to swap the platform. Pick a booking, then send its reminder.</p>
+      <button type="button" class="btn" id="resetBtn">↺ Reset demo</button>
+    </div>
 
-      .booking-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 12px;
-        background: #fff;
-        border: 1.5px solid var(--border);
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
+    <div class="pipeline">
 
-      .booking-item:hover {
-        border-color: var(--primary-light);
-      }
-
-      .booking-item.selected {
-        border-color: var(--primary);
-        background: var(--surface-soft);
-      }
-
-      .pet-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .pet-avatar {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
-        background: var(--accent-soft);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-      }
-
-      .pet-name {
-        font-weight: 700;
-        font-size: 13.5px;
-        color: var(--text-main);
-      }
-
-      .pet-meta {
-        font-size: 11.5px;
-        color: var(--text-muted);
-      }
-
-      .status-pill {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 4px 9px;
-        border-radius: 12px;
-      }
-
-      .status-due {
-        background: #fde8c8;
-        color: #9c6211;
-      }
-
-      .status-sent {
-        background: #dff0e5;
-        color: #235c3a;
-      }
-
-      .btn-run {
-        width: 100%;
-        margin-top: 12px;
-        padding: 11px;
-        border: none;
-        border-radius: 10px;
-        background: var(--primary);
-        color: #fff;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s, transform 0.1s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
-
-      .btn-run:hover {
-        background: var(--primary-light);
-      }
-
-      .btn-run:active {
-        transform: scale(0.98);
-      }
-
-      /* Phone SMS Preview */
-      .phone-frame {
-        background: #ffffff;
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 14px;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.03);
-      }
-
-      .phone-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-bottom: 10px;
-        margin-bottom: 12px;
-        border-bottom: 1px solid #eef2ee;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--text-main);
-      }
-
-      .sms-bubble {
-        background: var(--surface-soft);
-        color: var(--text-main);
-        padding: 12px 14px;
-        border-radius: 14px 14px 14px 4px;
-        font-size: 13px;
-        line-height: 1.45;
-        animation: popMsg 0.35s ease;
-      }
-
-      @keyframes popMsg {
-        0% { opacity: 0; transform: translateY(6px) scale(0.98); }
-        100% { opacity: 1; transform: translateY(0) scale(1); }
-      }
-
-      .sms-time {
-        font-size: 10.5px;
-        color: var(--text-muted);
-        margin-top: 6px;
-        display: flex;
-        justify-content: space-between;
-      }
-
-      .reply-bar {
-        display: flex;
-        gap: 6px;
-        margin-top: 10px;
-      }
-
-      .reply-chip {
-        flex: 1;
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 6px 8px;
-        font-size: 11.5px;
-        font-weight: 600;
-        color: var(--primary);
-        cursor: pointer;
-        transition: all 0.15s ease;
-      }
-
-      .reply-chip:hover {
-        background: var(--surface-soft);
-        border-color: var(--primary);
-      }
-
-      .customer-reply {
-        margin-top: 8px;
-        background: var(--primary);
-        color: #fff;
-        padding: 8px 12px;
-        border-radius: 14px 14px 4px 14px;
-        font-size: 12.5px;
-        align-self: flex-end;
-        margin-left: auto;
-        max-width: 82%;
-        display: none;
-        animation: popMsg 0.25s ease;
-      }
-
-      /* Interactive 3-Step Flow */
-      .steps {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-top: 22px;
-      }
-
-      .step {
-        background: var(--surface-soft);
-        border: 1.5px solid transparent;
-        border-radius: 14px;
-        padding: 14px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-
-      .step:hover, .step.active-step {
-        background: #fff;
-        border-color: var(--primary);
-        box-shadow: 0 4px 12px rgba(45, 90, 67, 0.08);
-      }
-
-      .step-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 6px;
-      }
-
-      .num {
-        color: var(--primary);
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-      }
-
-      .step-title {
-        font-weight: 700;
-        font-size: 13.5px;
-        margin-bottom: 4px;
-        color: var(--text-main);
-      }
-
-      .step-desc {
-        font-size: 12px;
-        color: var(--text-muted);
-      }
-
-      .foot {
-        margin-top: 20px;
-        padding-top: 14px;
-        border-top: 1px solid var(--border);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        color: var(--text-muted);
-        font-size: 11.5px;
-      }
-
-      @media (max-width: 720px) {
-        .wrap { padding: 20px; }
-        .demo-grid { grid-template-columns: 1fr; }
-        .steps { grid-template-columns: 1fr; }
-        h1 { font-size: 26px; }
-      }
-    </style>
-  </head>
-  <body>
-    <main class="wrap">
-      <div class="top">
-        <div>
-          <div class="eyebrow">🐾 Practical Workflow · Appointments</div>
-          <h1>Grooming reminders, without the daily chasing.</h1>
-          <p class="intro">
-            A busy dog grooming salon has enough to manage between baths and trims. Once a booking hits the calendar, customer reminders go out automatically.
-          </p>
+      <!-- Calendar -->
+      <div class="card">
+        <div class="card-head">
+          <h2>1. Tomorrow's Salon Calendar</h2>
+          <span class="auto">📅 Auto-Checked</span>
         </div>
-        <span class="tag">✂️ Independent Dog Grooming</span>
-      </div>
-
-      <!-- View Switcher -->
-      <div class="toggle-bar">
-        <span class="toggle-label">Compare the salon routine:</span>
-        <div class="toggle-btns">
-          <button class="toggle-btn active" id="btn-after" onclick="switchView('after')">
-            ✅ Automated Reminders (Try It)
+        <div class="menu-wrap" id="calWrap">
+          <button type="button" class="app-btn" id="calBtn" aria-haspopup="true" aria-expanded="false">
+            <span class="dot" id="calDot"></span><span id="calName">Google Calendar</span><span class="hint">▾</span>
           </button>
-          <button class="toggle-btn" id="btn-before" onclick="switchView('before')">
-            😫 Manual Chasing
-          </button>
+          <div class="menu" id="calMenu" role="menu" hidden></div>
         </div>
+        <div class="timeline" id="timeline"></div>
+        <button type="button" class="send" id="runBtn">⚡ Send Selected Reminder Now</button>
       </div>
 
-      <!-- BEFORE VIEW -->
-      <div id="view-before" class="view-panel">
-        <div class="chaos-box">
-          <div class="messy-note">
-            <strong>🛁 1:15 PM · Mid-Bath</strong>
-            Hands covered in shampoo while trying to remember who booked tomorrow's 9:00 AM full groom.
-          </div>
-          <div class="messy-note">
-            <strong>📵 4:30 PM · Rush Hour</strong>
-            Forgot to text Bella's owner—they thought the appointment was next Thursday. Empty table for 2 hours.
-          </div>
-          <div class="messy-note">
-            <strong>📋 6:45 PM · Closing Time</strong>
-            Manually scrolling tomorrow's calendar and typing out repetitive reminder texts one by one.
-          </div>
-        </div>
+      <!-- Steps -->
+      <div class="rail" id="rail" aria-label="How it works">
+        <button type="button" class="step" data-step="1" aria-current="step">
+          <span class="node">1</span>
+          <span>
+            <span class="step-kind"><span>Booking</span><span>📅</span></span>
+            <span class="step-title">Added to salon calendar</span>
+            <span class="step-desc">Staff book the dog's service and time slot just like they normally do.</span>
+          </span>
+        </button>
+        <button type="button" class="step" data-step="2">
+          <span class="node">2</span>
+          <span>
+            <span class="step-kind"><span>Automation</span><span>⏱️</span></span>
+            <span class="step-title">Checks reminder timing</span>
+            <span class="step-desc">Automatically spots upcoming visits 24 hours ahead—no manual list checking.</span>
+          </span>
+        </button>
+        <button type="button" class="step" data-step="3">
+          <span class="node">3</span>
+          <span>
+            <span class="step-kind"><span>Customer</span><span>💬</span></span>
+            <span class="step-title">Receives timely nudge</span>
+            <span class="step-desc">Owner gets the exact date, time, and an easy prompt if plans change.</span>
+          </span>
+        </button>
       </div>
 
-      <!-- AFTER VIEW (INTERACTIVE SIMULATOR) -->
-      <div id="view-after" class="view-panel active">
-        <div class="demo-grid">
-          <!-- Left: Salon Calendar Schedule -->
-          <div class="sim-card">
-            <div>
-              <div class="sim-title">
-                <span>1. Tomorrow's Salon Calendar</span>
-                <span>📅 Auto-Checked</span>
-              </div>
-              <div class="booking-list" id="bookingList">
-                <div class="booking-item selected" onclick="selectBooking(0)">
-                  <div class="pet-info">
-                    <div class="pet-avatar">🐕</div>
-                    <div>
-                      <div class="pet-name">Barnaby (Golden Retriever)</div>
-                      <div class="pet-meta">Owner: Claire M. · Tomorrow, 9:30 AM · Full Groom</div>
-                    </div>
-                  </div>
-                  <span class="status-pill status-due" id="pill-0">Due Now</span>
+      <!-- Phone -->
+      <div class="card phone-col">
+        <div class="card-head phone-title">
+          <h2>2. Customer Text Preview</h2>
+        </div>
+        <div class="phone" id="phone" data-channel="SMS">
+          <div class="screen">
+            <div class="screen-head">
+              <div class="salon">🐾 Paws &amp; Suds Grooming</div>
+              <div class="channel-row">
+                <div class="menu-wrap" id="chWrap">
+                  <button type="button" class="app-btn" id="chBtn" aria-haspopup="true" aria-expanded="false">
+                    <span class="dot" id="chDot"></span><span id="channelLabel">Automated SMS</span><span class="hint">▾</span>
+                  </button>
+                  <div class="menu" id="chMenu" role="menu" hidden></div>
                 </div>
-
-                <div class="booking-item" onclick="selectBooking(1)">
-                  <div class="pet-info">
-                    <div class="pet-avatar">🐩</div>
-                    <div>
-                      <div class="pet-name">Mochi (Toy Poodle)</div>
-                      <div class="pet-meta">Owner: Hannah L. · Tomorrow, 11:30 AM · Bath & Tidy</div>
-                    </div>
-                  </div>
-                  <span class="status-pill status-due" id="pill-1">Due Now</span>
-                </div>
-
-                <div class="booking-item" onclick="selectBooking(2)">
-                  <div class="pet-info">
-                    <div class="pet-avatar">🐶</div>
-                    <div>
-                      <div class="pet-name">Buster (French Bulldog)</div>
-                      <div class="pet-meta">Owner: Marcus T. · Tomorrow, 2:00 PM · Nail & Wash</div>
-                    </div>
-                  </div>
-                  <span class="status-pill status-sent" id="pill-2">Reminded ✓</span>
-                </div>
+                <span class="to" id="recipientTag">To: Claire M.</span>
               </div>
             </div>
-
-            <button class="btn-run" onclick="triggerReminder()">
-              <span>⚡ Send Selected Reminder Now</span>
-            </button>
+            <div class="thread" id="thread" aria-live="polite"></div>
           </div>
-
-          <!-- Right: Customer Phone Preview -->
-          <div class="sim-card">
-            <div>
-              <div class="sim-title">
-                <span>2. Customer Text Preview</span>
-                <span id="recipientTag">To: Claire M.</span>
-              </div>
-
-              <div class="phone-frame">
-                <div class="phone-header">
-                  <span>🐾 Paws & Suds Grooming</span>
-                  <span style="color: var(--primary); font-size: 11px;">Automated SMS</span>
-                </div>
-                <div class="sms-bubble" id="smsText">
-                  Hi Claire! Just a friendly reminder that <strong>Barnaby</strong> is booked for a <strong>Full Groom</strong> tomorrow at <strong>9:30 AM</strong>. Need to reschedule? Just reply or call us!
-                </div>
-                <div class="customer-reply" id="customerReply"></div>
-                <div class="sms-time">
-                  <span id="deliveryStatus">Ready to trigger</span>
-                  <span>24h before visit</span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px; margin-bottom: 5px; font-weight: 600;">
-                Test how the dog owner responds:
-              </div>
-              <div class="reply-bar">
-                <button class="reply-chip" onclick="simulateReply('confirm')">👍 "See you at 9:30!"</button>
-                <button class="reply-chip" onclick="simulateReply('change')">🔄 "Can we move by 30m?"</button>
-              </div>
-            </div>
+        </div>
+        <div class="delivery"><span id="deliveryStatus">Ready to trigger</span><span>24h before visit</span></div>
+        <div class="try">
+          <p>Test how the dog owner responds:</p>
+          <div class="replies">
+            <button type="button" class="btn" id="replyConfirm">👍 "See you at 9:30!"</button>
+            <button type="button" class="btn" id="replyChange">🔄 "Can we move by 30m?"</button>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Interactive 3-Step Flow -->
-      <div class="steps">
-        <div class="step active-step" id="step-1" onclick="highlightStep(1)">
-          <div class="step-top">
-            <span class="num">01 · BOOKING</span>
-            <span>📅</span>
-          </div>
-          <div class="step-title">Added to salon calendar</div>
-          <div class="step-desc">Staff book the dog's service and time slot just like they normally do.</div>
-        </div>
+    <div class="flex-note">
+      <strong>Flexible tool stack:</strong> Applications shown above are examples. Any platforms of your choice—such as Google Calendar, Calendly, or Square for bookings, and SMS, WhatsApp, or email for reminders—can be connected for the exact same purpose.
+    </div>
+  </section>
 
-        <div class="step" id="step-2" onclick="highlightStep(2)">
-          <div class="step-top">
-            <span class="num">02 · AUTOMATION</span>
-            <span>⏱️</span>
-          </div>
-          <div class="step-title">Checks reminder timing</div>
-          <div class="step-desc">Automatically spots upcoming visits 24 hours ahead—no manual list checking.</div>
-        </div>
+  <footer class="foot">
+    <span>🛡️ <strong>Salon stays in control:</strong> You manage your calendar and policies; the workflow handles routine reminders.</span>
+    <span>Built for Notion Embeds</span>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
 
-        <div class="step" id="step-3" onclick="highlightStep(3)">
-          <div class="step-top">
-            <span class="num">03 · CUSTOMER</span>
-            <span>💬</span>
-          </div>
-          <div class="step-title">Receives timely nudge</div>
-          <div class="step-desc">Owner gets the exact date, time, and an easy prompt if plans change.</div>
-        </div>
-      </div>
+<script>
+(function () {
+  "use strict";
 
-      <div class="foot">
-        <span>🛡️ <strong>Salon stays in control:</strong> You manage your calendar and policies; the workflow handles routine reminders.</span>
-        <span>Built for Notion Embeds</span>
-      </div>
-    </main>
+  var CALENDARS = [
+    { name: "Google Calendar",     color: "#4285f4" },
+    { name: "Calendly",            color: "#006bff" },
+    { name: "Square Appointments", color: "#8d99a1" }
+  ];
+  var CHANNELS = [
+    { name: "SMS",      color: "#34c759" },
+    { name: "WhatsApp", color: "#25d366" },
+    { name: "Email",    color: "#ffcf3f" }
+  ];
 
-    <script>
-      const bookings = [
-        {
-          dog: "Barnaby",
-          owner: "Claire M.",
-          firstName: "Claire",
-          service: "Full Groom",
-          time: "9:30 AM",
-          confirmReply: "Thanks for the reminder! See you and Barnaby at 9:30 AM 👍",
-          changeReply: "Hi! Any chance we could push 9:30 AM to 10:00 AM tomorrow?"
-        },
-        {
-          dog: "Mochi",
-          owner: "Hannah L.",
-          firstName: "Hannah",
-          service: "Bath & Tidy",
-          time: "11:30 AM",
-          confirmReply: "Confirmed! Mochi can't wait for her spa day 🐩✨",
-          changeReply: "Hey, something came up—can we reschedule Mochi for Friday?"
-        },
-        {
-          dog: "Buster",
-          owner: "Marcus T.",
-          firstName: "Marcus",
-          service: "Nail & Wash",
-          time: "2:00 PM",
-          confirmReply: "Got it, we'll be there right at 2:00 PM!",
-          changeReply: "Hi! Need to move Buster to next week if possible."
-        }
-      ];
+  var BOOKINGS = [
+    { dog: "Barnaby", breed: "Golden Retriever", emoji: "🐕", owner: "Claire M.", first: "Claire", service: "Full Groom",  time: "9:30 AM",  at: 0.5, sentAuto: false,
+      confirm: "Thanks for the reminder! See you and Barnaby at 9:30 AM 👍",
+      change:  "Hi! Any chance we could push 9:30 AM to 10:00 AM tomorrow?" },
+    { dog: "Mochi",   breed: "Toy Poodle",       emoji: "🐩", owner: "Hannah L.", first: "Hannah", service: "Bath & Tidy", time: "11:30 AM", at: 2.5, sentAuto: false,
+      confirm: "Confirmed! Mochi can't wait for her spa day 🐩✨",
+      change:  "Hey, something came up—can we reschedule Mochi for Friday?" },
+    { dog: "Buster",  breed: "French Bulldog",   emoji: "🐶", owner: "Marcus T.", first: "Marcus", service: "Nail & Wash", time: "2:00 PM",  at: 5,   sentAuto: true,
+      confirm: "Got it, we'll be there right at 2:00 PM!",
+      change:  "Hi! Need to move Buster to next week if possible." }
+  ];
 
-      let currentIdx = 0;
+  var state, timers = [], toastTimer = null;
 
-      function switchView(mode) {
-        document.getElementById("view-before").classList.toggle("active", mode === "before");
-        document.getElementById("view-after").classList.toggle("active", mode === "after");
-        document.getElementById("btn-before").classList.toggle("active", mode === "before");
-        document.getElementById("btn-after").classList.toggle("active", mode === "after");
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function freshState() {
+    return {
+      idx: 0, step: 1, calendar: "Google Calendar", channel: "SMS",
+      items: BOOKINGS.map(function (b) { return { sent: b.sentAuto, auto: b.sentAuto, reply: null }; })
+    };
+  }
+
+  function toast(msg) {
+    var el = $("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2000);
+  }
+
+  /* ---------- Rendering ---------- */
+  function buildTimeline() {
+    $("timeline").innerHTML = BOOKINGS.map(function (b, i) {
+      return '<div class="slot"><span class="slot-time">' + esc(b.time) + "</span>" +
+        '<button type="button" class="blk" data-idx="' + i + '" aria-pressed="false">' +
+        '<span class="avatar">' + b.emoji + "</span>" +
+        '<span><span class="pet-name">' + esc(b.dog) + " (" + esc(b.breed) + ")</span>" +
+        '<span class="pet-meta">Owner: ' + esc(b.owner) + " · Tomorrow, " + esc(b.time) + " · " + esc(b.service) + "</span></span>" +
+        '<span class="status" id="status-' + i + '"></span></button></div>';
+    }).join("");
+  }
+
+  function renderBookings() {
+    Array.prototype.forEach.call(document.querySelectorAll(".blk"), function (el) {
+      var i = Number(el.getAttribute("data-idx"));
+      el.setAttribute("aria-pressed", String(i === state.idx));
+      var st = $("status-" + i);
+      var sent = state.items[i].sent;
+      st.textContent = sent ? "Reminded ✓" : "Due Now";
+      st.className = "status " + (sent ? "sent" : "due");
+    });
+  }
+
+  function renderSteps() {
+    Array.prototype.forEach.call(document.querySelectorAll(".step"), function (el) {
+      var n = Number(el.getAttribute("data-step"));
+      if (n === state.step) el.setAttribute("aria-current", "step"); else el.removeAttribute("aria-current");
+    });
+  }
+
+  function threadHtml() {
+    var b = BOOKINGS[state.idx], it = state.items[state.idx];
+    var body = "Hi " + esc(b.first) + "! Just a friendly reminder that <strong>" + esc(b.dog) + "</strong> is booked for a <strong>" +
+      esc(b.service) + "</strong> tomorrow at <strong>" + esc(b.time) + "</strong>. Need to reschedule? Just reply or call us!";
+    var out = "";
+    var draft = it.sent ? "" : " draft";
+    var subj = state.channel === "Email"
+      ? '<span class="subject">Reminder: ' + esc(b.dog) + "'s " + esc(b.service) + " tomorrow at " + esc(b.time) + "</span>" : "";
+    var tag = it.sent ? "" : '<span class="draft-tag">Preview — not sent yet</span>';
+    out += '<div class="bubble' + draft + (it.fresh ? " pop" : "") + '">' + tag + subj + body + "</div>";
+    if (it.reply) {
+      out += '<div class="bubble reply pop">' + (state.channel === "Email" ? '<span class="subject">Re: Reminder</span>' : "") +
+        esc(b[it.reply]) + "</div>";
+    }
+    return out;
+  }
+
+  function statusText() {
+    var it = state.items[state.idx];
+    if (it.reply === "confirm") return "✓ Confirmed by owner";
+    if (it.reply === "change") return "⚠️ Salon notified to adjust";
+    if (!it.sent) return "Ready to trigger";
+    return it.auto ? "✓ Sent automatically via " + state.channel : "✓ Delivered just now via " + state.channel;
+  }
+
+  function renderPhone() {
+    var b = BOOKINGS[state.idx];
+    $("phone").setAttribute("data-channel", state.channel);
+    $("recipientTag").textContent = "To: " + b.owner;
+    $("channelLabel").textContent = "Automated " + state.channel;
+    $("thread").innerHTML = threadHtml();
+    state.items[state.idx].fresh = false;
+    $("deliveryStatus").textContent = statusText();
+    $("replyConfirm").textContent = '👍 "See you at ' + b.time.replace(" AM", "").replace(" PM", "") + '!"';
+    $("calName").textContent = state.calendar;
+    var cal = CALENDARS.filter(function (c) { return c.name === state.calendar; })[0];
+    var ch = CHANNELS.filter(function (c) { return c.name === state.channel; })[0];
+    $("calDot").style.background = cal.color;
+    $("chDot").style.background = ch.color;
+  }
+
+  function render() { renderBookings(); renderSteps(); renderPhone(); }
+
+  /* ---------- Actions ---------- */
+  function selectBooking(i) {
+    state.idx = i;
+    render();
+  }
+
+  function setStep(n) { state.step = n; renderSteps(); }
+
+  function sendReminder() {
+    var it = state.items[state.idx];
+    it.sent = true; it.auto = false; it.fresh = true;
+    setStep(1);
+    later(function () { setStep(2); }, 220);
+    later(function () { setStep(3); }, 500);
+    render();
+  }
+
+  function simulateReply(type) {
+    var it = state.items[state.idx];
+    if (!it.sent) {
+      sendReminder();
+      var idx = state.idx;
+      later(function () { if (state.idx === idx) { state.items[idx].reply = type; renderPhone(); } else { state.items[idx].reply = type; } }, 650);
+    } else {
+      it.reply = type;
+      renderPhone();
+    }
+  }
+
+  function reset() {
+    clearTimers();
+    closeMenus();
+    state = freshState();
+    render();
+    toast("Demo reset.");
+  }
+
+  function switchView(mode) {
+    var before = mode === "before";
+    $("view-before").hidden = !before;
+    $("view-after").hidden = before;
+    $("btn-before").setAttribute("aria-pressed", String(before));
+    $("btn-after").setAttribute("aria-pressed", String(!before));
+  }
+
+  /* ---------- Menus ---------- */
+  function closeMenus() {
+    ["calMenu", "chMenu"].forEach(function (id) { $(id).hidden = true; });
+    $("calBtn").setAttribute("aria-expanded", "false");
+    $("chBtn").setAttribute("aria-expanded", "false");
+  }
+
+  function setupMenu(btnId, menuId, options, getCurrent, onPick) {
+    var btn = $(btnId), menu = $(menuId);
+    function fill() {
+      menu.innerHTML = options.map(function (o) {
+        return '<button type="button" role="menuitemradio" aria-checked="' + (o.name === getCurrent()) + '" data-val="' + esc(o.name) + '">' +
+          '<span class="dot" style="background:' + o.color + '"></span>' + esc(o.name) + "</button>";
+      }).join("");
+    }
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var open = menu.hidden;
+      closeMenus();
+      if (open) {
+        fill();
+        menu.hidden = false;
+        btn.setAttribute("aria-expanded", "true");
+        var first = menu.querySelector("button");
+        if (first) first.focus();
       }
+    });
+    menu.addEventListener("click", function (e) {
+      var item = e.target.closest("button[data-val]");
+      if (!item) return;
+      onPick(item.getAttribute("data-val"));
+      closeMenus();
+      btn.focus();
+    });
+    menu.addEventListener("keydown", function (e) {
+      var items = Array.prototype.slice.call(menu.querySelectorAll("button"));
+      var i = items.indexOf(document.activeElement);
+      if (e.key === "ArrowDown") { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+      if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    });
+  }
 
-      function highlightStep(stepNum) {
-        [1, 2, 3].forEach((n) => {
-          document.getElementById(`step-${n}`).classList.toggle("active-step", n === stepNum);
-        });
-      }
+  /* ---------- Wiring ---------- */
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".menu-wrap")) closeMenus();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeMenus();
+  });
 
-      function selectBooking(idx) {
-        currentIdx = idx;
-        document.querySelectorAll(".booking-item").forEach((el, i) => {
-          el.classList.toggle("selected", i === idx);
-        });
+  setupMenu("calBtn", "calMenu", CALENDARS, function () { return state.calendar; }, function (v) {
+    state.calendar = v; renderPhone(); toast("Now using " + v + ".");
+  });
+  setupMenu("chBtn", "chMenu", CHANNELS, function () { return state.channel; }, function (v) {
+    state.channel = v; renderPhone(); toast("Reminders now go out by " + v + ".");
+  });
 
-        const b = bookings[idx];
-        document.getElementById("recipientTag").textContent = `To: ${b.owner}`;
-        const smsEl = document.getElementById("smsText");
-        smsEl.style.animation = "none";
-        smsEl.offsetHeight; // trigger reflow
-        smsEl.style.animation = null;
-        smsEl.innerHTML = `Hi ${b.firstName}! Just a friendly reminder that <strong>${b.dog}</strong> is booked for a <strong>${b.service}</strong> tomorrow at <strong>${b.time}</strong>. Need to reschedule? Just reply or call us!`;
+  $("btn-after").addEventListener("click", function () { switchView("after"); });
+  $("btn-before").addEventListener("click", function () { switchView("before"); });
+  $("runBtn").addEventListener("click", sendReminder);
+  $("resetBtn").addEventListener("click", reset);
+  $("replyConfirm").addEventListener("click", function () { simulateReply("confirm"); });
+  $("replyChange").addEventListener("click", function () { simulateReply("change"); });
 
-        const replyBox = document.getElementById("customerReply");
-        replyBox.style.display = "none";
+  $("timeline").addEventListener("click", function (e) {
+    var blk = e.target.closest(".blk");
+    if (blk) selectBooking(Number(blk.getAttribute("data-idx")));
+  });
+  $("rail").addEventListener("click", function (e) {
+    var s = e.target.closest(".step");
+    if (s) setStep(Number(s.getAttribute("data-step")));
+  });
 
-        const pill = document.getElementById(`pill-${idx}`);
-        const isSent = pill.classList.contains("status-sent");
-        document.getElementById("deliveryStatus").textContent = isSent ? "✓ Sent automatically" : "Ready to trigger";
-      }
-
-      function triggerReminder() {
-        highlightStep(1);
-        setTimeout(() => highlightStep(2), 220);
-        setTimeout(() => highlightStep(3), 500);
-
-        const pill = document.getElementById(`pill-${currentIdx}`);
-        pill.textContent = "Reminded ✓";
-        pill.className = "status-pill status-sent";
-
-        selectBooking(currentIdx);
-        document.getElementById("deliveryStatus").textContent = "✓ Delivered just now";
-      }
-
-      function simulateReply(type) {
-        const b = bookings[currentIdx];
-        const replyBox = document.getElementById("customerReply");
-        replyBox.textContent = type === "confirm" ? b.confirmReply : b.changeReply;
-        replyBox.style.display = "block";
-        document.getElementById("deliveryStatus").textContent =
-          type === "confirm" ? "✓ Confirmed by owner" : "⚠️ Salon notified to adjust";
-      }
-    </script>
-  </body>
+  /* ---------- Init ---------- */
+  state = freshState();
+  buildTimeline();
+  render();
+})();
+</script>
+</body>
 </html>
